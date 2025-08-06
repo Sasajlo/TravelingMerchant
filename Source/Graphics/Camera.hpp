@@ -3,6 +3,7 @@
 #include <iostream>
 #include <Core/Component.hpp>
 #include <Utils/Color.hpp>
+#include <Utils/Vector3.hpp>
 #include <glm/glm.hpp>
 
 using namespace TM::Utils;
@@ -29,7 +30,7 @@ namespace TM
 			// Look at target
 			GameObject* _followTarget = nullptr;
 			GameObject* _lookAtTarget = nullptr;
-			glm::vec3 _followOffset = glm::vec3(0.0f, 5.0f, 10.0f); // Camera offset from target
+			Vector3 _followOffset = Vector3(0.0f, 5.0f, 10.0f); // Camera offset from target
 
 		public:
 			Camera(GameObject& gameObject);
@@ -43,8 +44,12 @@ namespace TM
 			void SetBackgroundColor(Color color);
 			Color GetBackgroundColor();
 			void SetMainCamera();
+
 			void LookAt(GameObject* target) { _lookAtTarget = target; }
-			void Follow(GameObject* target, const glm::vec3& offset) { _followTarget = target; _followOffset = offset; }
+			void Follow(GameObject* target, Vector3 offset) { _followTarget = target; _followOffset = offset; }
+
+			Vector3 GetFollowOffset() { return _followOffset; }
+			void SetFollowOffset(Vector3 offset) { _followOffset = offset; }
 
 			glm::mat4 GetViewMatrix() const;
 			glm::mat4 GetProjectionMatrix() const;

@@ -43,14 +43,9 @@ void Camera::Update(float deltaTime)
 
 	// Get target position
 	const Transform& targetTransform = _followTarget->_transform;
-	glm::vec3 targetPos = glm::vec3(
-		targetTransform._position.x,
-		targetTransform._position.y,
-		targetTransform._position.z
-	);
 
 	// Calculate camera position (target position + offset)
-	glm::vec3 cameraPos = targetPos + _followOffset;
+	Vector3 cameraPos = _followTarget->_transform._position + _followOffset;
 
 	// Update camera transform
 	Transform& cameraTransform = _gameObject._transform;

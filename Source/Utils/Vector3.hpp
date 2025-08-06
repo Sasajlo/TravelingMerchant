@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cmath>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace TM
 {
@@ -34,6 +37,9 @@ namespace TM
 			float Length() const { return sqrt(x * x + y * y + z * z); }
 			float SquaredLength() const { return x * x + y * y + z * z; }
 			Vector3 Normalized() const { float mag = Length(); return mag > 0 ? *this / mag : Vector3(); }
+			Vector3 Lerp(Vector3 target, float value);
+
+			Vector3 RotateAroundY(float angle);
 
 			// Global constants
 			static const Vector3 Zero;

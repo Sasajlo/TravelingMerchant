@@ -25,7 +25,6 @@ int main()
 
 	// Create camera object
 	GameObject* cameraObject = GameObject::Create("Main Camera");
-	cameraObject->_transform.SetRotation(-15.0f, 0.0f, 0.0f);
 	Camera* camera = cameraObject->AddComponent<Camera>();
 	camera->SetBackgroundColor(Color::GRAY);
 
@@ -37,7 +36,7 @@ int main()
 	playerObject->AddComponent<SpriteRenderer>();
 
 	camera->LookAt(playerObject); // Set camera to follow player
-	camera->Follow(playerObject, { 10.0f, 5.0f, 10.0f }); // Set camera to follow player
+	camera->Follow(playerObject, { 0.0f, 5.0f, 10.0f }); // Set camera to follow player
 
 	// Create ground object
 	GameObject* groundObject = GameObject::Create("Ground");
