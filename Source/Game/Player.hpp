@@ -43,37 +43,26 @@ namespace TM
                 if (Input::IsKeyHeld(GLFW_KEY_W))
                 {
                     _gameObject._transform._position.y += SPEED * deltaTime;
-                    std::cout << "Player position: " <<
-                        _gameObject._transform._position.x << " " <<
-                        _gameObject._transform._position.y << " " <<
-                        _gameObject._transform._position.z << std::endl;
                 }
 
                 if (Input::IsKeyHeld(GLFW_KEY_S))
                 {
                     _gameObject._transform._position.y -= SPEED * deltaTime;
-                    std::cout << "Player position: " <<
-                        _gameObject._transform._position.x << " " <<
-                        _gameObject._transform._position.y << " " <<
-                        _gameObject._transform._position.z << std::endl;
                 }
 
                 if (Input::IsKeyHeld(GLFW_KEY_D))
                 {
                     _gameObject._transform._position.x += SPEED * deltaTime;
-                    std::cout << "Player position: " <<
-                        _gameObject._transform._position.x << " " <<
-                        _gameObject._transform._position.y << " " <<
-                        _gameObject._transform._position.z << std::endl;
                 }
 
                 if (Input::IsKeyHeld(GLFW_KEY_A))
                 {
                     _gameObject._transform._position.x -= SPEED * deltaTime;
-                    std::cout << "Player position: " <<
-                        _gameObject._transform._position.x << " " <<
-                        _gameObject._transform._position.y << " " <<
-                        _gameObject._transform._position.z << std::endl;
+                }
+
+                if (Input::IsKeyHeld(GLFW_KEY_Q))
+                {
+                    _gameObject._transform._rotation.z -= SPEED * deltaTime;
                 }
             }
 

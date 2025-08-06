@@ -1,5 +1,7 @@
 #include "Time.hpp"
 #include <cmath>
+#include <Core/Engine.hpp>
+#include <iostream>
 
 using namespace TM::Core;
 
@@ -22,5 +24,7 @@ void Time::Update()
 		_fps = std::floor(_frameCount / _timePassed);
 		_frameCount = 0;
 		_timePassed = 0.0f;
+		Engine::RenderFPS(_fps);
+		//std::cout << "FPS: " << _fps << std::endl;
 	}
 }

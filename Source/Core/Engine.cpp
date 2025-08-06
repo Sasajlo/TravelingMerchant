@@ -7,19 +7,10 @@
 using namespace TM::Core;
 using namespace TM::Graphics;
 
-Engine::Engine()
-{
-
-}
-
-Engine::~Engine()
-{
-}
-
 bool Engine::Initialize(const std::string& title, int width, int height)
 {
 	// Initialize window
-	if (!_window.Initialize(title, width, height)) {
+	if (!Instance()._window.Initialize(title, width, height)) {
 		std::cerr << "Failed to initialize window!" << std::endl;
 		return false;
 	};
@@ -31,7 +22,7 @@ bool Engine::Initialize(const std::string& title, int width, int height)
 void Engine::Run()
 {
 	std::cout << "Engine is running!" << std::endl;
-	while (!_window.ShouldClose())
+	while (!Instance()._window.ShouldClose())
 	{
 		// Get the active scene from the SceneManager
 		auto currentScene = SceneManager::GetActiveScene();
@@ -41,28 +32,25 @@ void Engine::Run()
 		currentScene->Start();
 
 		// Handle delta time calculation
-		_time.Update();
-
-		// Update the window title with the current FPS
-		_window.UpdateFPS(_time.GetFPS());
+		Instance()._time.Update();
 
 		// Update input states
 		Input::Update();
 
 		// Update the active scene
-		currentScene->Update(_time.GetDeltaTime());
+		currentScene->Update(Instance()._time.GetDeltaTime());
 
 		// Clear the window from previous frame
-		_window.Clear(Camera::GetMain()->GetBackgroundColor());
+		Instance()._window.Clear(Camera::GetMain()->GetBackgroundColor());
 
 		// Render the active scene
 		currentScene->Render();
 
 		// Swap buffers
-		_window.SwapBuffers();
+		Instance()._window.SwapBuffers();
 
 		// Poll for events
-		_window.PollEvents();
+		Instance()._window.PollEvents();
 	}
 }
 
@@ -75,5 +63,10 @@ void Engine::Shutdown()
 {
 	std::cout << "Engine shutting down!" << std::endl;
 	SceneManager::Destroy();
-	_window.Destroy();
+	Instance()._window.Destroy();
+}
+
+void Engine::RenderFPS(int fps)
+{
+	Instance()._window.UpdateFPS(fps);
 }

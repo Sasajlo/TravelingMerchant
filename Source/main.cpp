@@ -3,6 +3,8 @@
 #include <Core/SceneManager.hpp>
 #include <Core/GameObject.hpp>
 #include <Graphics/Camera.hpp>
+#include <Graphics/Sprite.hpp>
+#include <Graphics/SpriteRenderer.hpp>
 #include <Utils/Color.hpp>
 #include <Game/Player.hpp>
 
@@ -13,8 +15,7 @@ using namespace TM::Game;
 
 int main()
 {
-	Engine engine;
-	if (!engine.Initialize("Traveling Merchant", 800, 600)) {
+	if (!Engine::Initialize("Traveling Merchant", 800, 600)) {
 		std::cerr << "Failed to initialize engine!" << std::endl;
 		return -1;
 	}
@@ -22,18 +23,33 @@ int main()
 	// Create main scene
 	SceneManager::AddScene("Main Scene");
 
-	// Create camera game object to main scene
+	// Create camera object
 	GameObject* cameraObject = GameObject::Create("Main Camera");
+	cameraObject->_transform.SetRotation(-15.0f, 0.0f, 0.0f);
 	Camera* camera = cameraObject->AddComponent<Camera>();
 	camera->SetBackgroundColor(Color::GRAY);
 
-	// Create player game object to main scene
+	// Create player object
 	GameObject* playerObject = GameObject::Create("Player");
-	Player* player = playerObject->AddComponent<Player>();
-	player->CustomMethod(); // Call custom method to demonstrate functionality
+	playerObject->AddComponent<Player>();
+	Sprite* playerSprite = playerObject->AddComponent<Sprite>();
+	playerSprite->SetTexture("Assets/Textures/Tiles/bedrock.png");
+	playerObject->AddComponent<SpriteRenderer>();
 
-	engine.Run();
-	engine.Shutdown();
+	camera->LookAt(playerObject); // Set camera to follow player
+	camera->Follow(playerObject, { 10.0f, 5.0f, 10.0f }); // Set camera to follow player
+
+	// Create ground object
+	GameObject* groundObject = GameObject::Create("Ground");
+	groundObject->_transform.SetPosition(0.0f, -5.0f, 0.0f);
+	groundObject->_transform.SetRotation(90.0f, 0.0f, 0.0f);
+	groundObject->_transform.SetScale(10.0f, 10.0f, 10.0f);
+	Sprite* groundSprite = groundObject->AddComponent<Sprite>();
+	groundSprite->SetTexture("Assets/Textures/Tiles/grass.png");
+	groundObject->AddComponent<SpriteRenderer>();
+
+	Engine::Run();
+	Engine::Shutdown();
 
 	return 0;
 }

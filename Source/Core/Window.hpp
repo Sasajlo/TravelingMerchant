@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <Utils/Color.hpp>
@@ -16,6 +17,8 @@ namespace TM
 		public:
 			Window() = default;
 			~Window() = default;
+
+			static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 			bool Initialize(const std::string& title, int width=600, int height=400);
 			void Close();

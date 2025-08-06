@@ -3,6 +3,9 @@
 #include <iostream>
 #include <Core/Component.hpp>
 #include <Utils/Vector3.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace TM::Utils;
 
@@ -41,6 +44,17 @@ namespace TM
 			void Translate(const Vector3& translation) { _position += translation; }
 			void Rotate(const Vector3& rotation) { _rotation += rotation; }
 			void Scale(const Vector3& scale) { _scale.x *= scale.x; _scale.y *= scale.y; _scale.z *= scale.z; }
+
+			glm::mat4 GetModelMatrix() const
+			{
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(_position.x, _position.y, _position.z));
+				model = glm::rotate(model, glm::radians(_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)); // Pitch
+				model = glm::rotate(model, glm::radians(_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Yaw
+				model = glm::rotate(model, glm::radians(_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Roll
+				model = glm::scale(model, glm::vec3(_scale.x, _scale.y, _scale.z));
+				return model;
+			}
 		};
 	}
 }

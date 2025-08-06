@@ -14,15 +14,6 @@ namespace TM
 
 		class SceneManager
 		{
-		public:
-			~SceneManager() = default;
-
-			static void AddScene(const std::string& name);
-			static void SetActiveScene(const std::string& name);
-			static Scene* GetActiveScene();
-			static void Destroy();
-
-
 		private:
 			SceneManager() = default;
 
@@ -34,6 +25,14 @@ namespace TM
 
 			std::unordered_map<std::string, std::unique_ptr<Scene>> _scenes;
 			Scene* _activeScene = nullptr; // Raw pointer for easy access, SceneManager owns the Scene
+
+		public:
+			~SceneManager() = default;
+
+			static void AddScene(const std::string& name);
+			static void SetActiveScene(const std::string& name);
+			static Scene* GetActiveScene();
+			static void Destroy();
 		};
 	}
 }
