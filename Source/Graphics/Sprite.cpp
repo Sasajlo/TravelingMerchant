@@ -1,22 +1,11 @@
 #include <Graphics/Sprite.hpp>
 
-#include <glad/glad.h>
-
 // Include stb_image for texture loading
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../Extern/stb_image.h"
 
 using namespace TM::Graphics;
 using namespace TM::Core;
-
-// Vertex data for a quad with texture coordinates
-float vertices[] = {
-	// positions        // texture coords
-	-1.0f, -1.0f, 0.0f,  0.0f, 0.0f,  // bottom-left
-	 1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  // bottom-right
-	 1.0f,  1.0f, 0.0f,  1.0f, 1.0f,  // top-right
-	-1.0f,  1.0, 0.0f,  0.0f, 1.0f   // top-left
-};
 
 unsigned int indices[] = {
 	0, 1, 2, // first triangle
@@ -43,10 +32,11 @@ unsigned int loadTexture(const char* path) {
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // Pixel-perfect rendering settings
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // No wrapping
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);  // No wrapping
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);     // Pixel-perfect minification
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);     // Pixel-perfect magnification
 
         stbi_image_free(data);
         std::cout << "Texture loaded successfully: " << path << std::endl;
@@ -61,19 +51,53 @@ unsigned int loadTexture(const char* path) {
 
 void Sprite::Start()
 {
-	std::cout << "Sprite::Bind() called for GameObject: " << _gameObject.GetName() << std::endl;
-	std::cout << "this pointer: " << this << std::endl;
-	
-	// Load the default texture
-	_textureId = loadTexture(_texturePath.c_str());
+    std::cout << "Sprite::Start() called for GameObject: " << _gameObject.GetName() << std::endl;
 
-    // Bind texture
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _textureId);
+    // Load the texture
+    _textureId = loadTexture(_texturePath.c_str());
 
+    std::cout << "Texture ID: " << _textureId << " for " << _gameObject.GetName() << std::endl;
+
+    // Generate OpenGL objects
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
     glGenBuffers(1, &_EBO);
+
+    // Update vertex data with current pivot
+    UpdateVertexData();
+
+    std::cout << "Sprite::Start() completed successfully" << std::endl;
+}
+
+void Sprite::Bind()
+{
+    glBindVertexArray(_VAO);
+    glBindTexture(GL_TEXTURE_2D, _textureId);
+}
+
+void Sprite::SetPivot(float x, float y)
+{
+    _pivot = { glm::clamp(x, 0.0f, 1.0f), glm::clamp(y, 0.0f, 1.0f) };
+    UpdateVertexData();
+}
+
+void Sprite::UpdateVertexData()
+{
+    // Calculate vertex positions based on pivot
+    // Pivot (0,0) = bottom-left, (1,1) = top-right, (0.5,0.5) = center
+    float left = -_pivot.x;
+    float right = 1.0f - _pivot.x;
+    float bottom = -_pivot.y;
+    float top = 1.0f - _pivot.y;
+
+    // Vertex data for a quad with texture coordinates (adjusted for pivot)
+    float vertices[] = {
+        // positions              // texture coords
+        left,  bottom, 0.0f,      0.0f, 0.0f,  // bottom-left
+        right, bottom, 0.0f,      1.0f, 0.0f,  // bottom-right
+        right, top,    0.0f,      1.0f, 1.0f,  // top-right
+        left,  top,    0.0f,      0.0f, 1.0f   // top-left
+    };
 
     glBindVertexArray(_VAO);
 
@@ -94,12 +118,4 @@ void Sprite::Start()
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
-	
-	std::cout << "Sprite::Bind() completed successfully" << std::endl;
-}
-
-void Sprite::Bind()
-{
-    glBindVertexArray(_VAO);
-    glBindTexture(GL_TEXTURE_2D, _textureId);
 }

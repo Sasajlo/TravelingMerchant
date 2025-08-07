@@ -39,17 +39,35 @@ void Camera::Start()
 
 void Camera::Update(float deltaTime)
 {
-	if (!_followTarget) return;
+	if (_followTarget)
+	{
+		// Get target position
+		const Transform& targetTransform = _followTarget->_transform;
 
-	// Get target position
-	const Transform& targetTransform = _followTarget->_transform;
+		// Calculate camera position (target position + offset)
+		Vector3 cameraPos = _followTarget->_transform._position + _followOffset;
 
-	// Calculate camera position (target position + offset)
-	Vector3 cameraPos = _followTarget->_transform._position + _followOffset;
+		// Update camera transform
+		_gameObject._transform.SetPosition(cameraPos.x, cameraPos.y, cameraPos.z);
+	}
 
-	// Update camera transform
-	Transform& cameraTransform = _gameObject._transform;
-	cameraTransform.SetPosition(cameraPos.x, cameraPos.y, cameraPos.z);
+	if (_lookAtTarget)
+	{
+		const Transform& targetTransform = _lookAtTarget->_transform;
+		// Calculate rotation to face target
+		Vector3 dir = targetTransform._position - _gameObject._transform._position;
+		dir = dir.Normalized();
+
+		auto quaternion = glm::quatLookAt(
+			glm::vec3(dir.x, dir.y, dir.z), // Direction vector
+			glm::vec3(0.0f, 1.0f, 0.0f)     // Up vector
+		);
+
+		glm::vec3 eulerRadians = glm::eulerAngles(quaternion);
+
+		// Convert to degrees for your transform
+		_gameObject._transform._rotation = { glm::degrees(eulerRadians.x), glm::degrees(eulerRadians.y), glm::degrees(eulerRadians.z) };
+	}
 }
 
 void Camera::SetBackgroundColor(Color color)

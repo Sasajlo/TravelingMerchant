@@ -23,7 +23,7 @@ namespace TM
             const float SPEED = 5.0f; // Player movement speed
 			float _cameraAngle = 0.0f;
 			float _targetAngle = 0.0f;
-			Vector3 _cameraOffset = Vector3(0.0f, 5.0f, 10.0f); // Camera offset from player
+			Vector3 _cameraOffset = Vector3(0.0f, 10.0f, 10.0f); // Camera offset from player
 
         public:
 			Player(GameObject& gameObject) : Component(gameObject) {}
@@ -40,31 +40,7 @@ namespace TM
 
             void Update(float deltaTime) override
             {
-                if (Input::IsKeyPressed(GLFW_KEY_SPACE))
-                {
-                    std::cout << "Player jumped!" << std::endl;
-                }
-
-                if (Input::IsKeyHeld(GLFW_KEY_W))
-                {
-                    _gameObject._transform._position.y += SPEED * deltaTime;
-                }
-
-                if (Input::IsKeyHeld(GLFW_KEY_S))
-                {
-                    _gameObject._transform._position.y -= SPEED * deltaTime;
-                }
-
-                if (Input::IsKeyHeld(GLFW_KEY_D))
-                {
-                    _gameObject._transform._position.x += SPEED * deltaTime;
-                }
-
-                if (Input::IsKeyHeld(GLFW_KEY_A))
-                {
-                    _gameObject._transform._position.x -= SPEED * deltaTime;
-                }
-
+				// Handle camera rotation
                 if (Input::IsKeyPressed(GLFW_KEY_Q))
                 {
                     _targetAngle -= 45.0f;
@@ -79,6 +55,32 @@ namespace TM
                 _cameraAngle = std::lerp(_cameraAngle, _targetAngle, 10.0f * deltaTime);
                 Vector3 newOffset = _cameraOffset.RotateAroundY(_cameraAngle);
                 Camera::GetMain()->SetFollowOffset(newOffset);
+
+				// Handle player movement
+                Vector3 direction(0.0f, 0.0f, 0.0f);
+
+                if (Input::IsKeyHeld(GLFW_KEY_W))
+                    direction.z -= 1.0f;
+                if (Input::IsKeyHeld(GLFW_KEY_S))
+                    direction.z += 1.0f;
+                if (Input::IsKeyHeld(GLFW_KEY_D))
+                    direction.x += 1.0f;
+                if (Input::IsKeyHeld(GLFW_KEY_A))
+                    direction.x -= 1.0f;
+
+                if (direction.Length() > 0.0f)
+                    direction = direction.Normalized();
+
+                float radians = glm::radians(-_cameraAngle);
+                float sinA = std::sin(radians);
+                float cosA = std::cos(radians);
+
+                Vector3 rotatedDir;
+                rotatedDir.x = direction.x * cosA - direction.z * sinA;
+                rotatedDir.z = direction.x * sinA + direction.z * cosA;
+                rotatedDir.y = 0.0f; // No vertical movement
+
+                _gameObject._transform._position += rotatedDir * SPEED * deltaTime;
             }
 
             void Render() override

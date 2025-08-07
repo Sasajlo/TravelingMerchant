@@ -7,6 +7,7 @@
 #include <Graphics/SpriteRenderer.hpp>
 #include <Utils/Color.hpp>
 #include <Game/Player.hpp>
+#include <Game/Billboard.hpp>
 
 using namespace TM::Core;
 using namespace TM::Graphics;
@@ -32,15 +33,17 @@ int main()
 	GameObject* playerObject = GameObject::Create("Player");
 	playerObject->AddComponent<Player>();
 	Sprite* playerSprite = playerObject->AddComponent<Sprite>();
-	playerSprite->SetTexture("Assets/Textures/Tiles/bedrock.png");
+	playerSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
+	playerSprite->SetTexture("Assets/Textures/player.png");
 	playerObject->AddComponent<SpriteRenderer>();
+	playerObject->AddComponent<Billboard>();
 
 	camera->LookAt(playerObject); // Set camera to follow player
-	camera->Follow(playerObject, { 0.0f, 5.0f, 10.0f }); // Set camera to follow player
+	camera->Follow(playerObject, {}); // Set camera to follow player
 
 	// Create ground object
 	GameObject* groundObject = GameObject::Create("Ground");
-	groundObject->_transform.SetPosition(0.0f, -5.0f, 0.0f);
+	groundObject->_transform.SetPosition(0.0f, 0.0f, 0.0f);
 	groundObject->_transform.SetRotation(90.0f, 0.0f, 0.0f);
 	groundObject->_transform.SetScale(10.0f, 10.0f, 10.0f);
 	Sprite* groundSprite = groundObject->AddComponent<Sprite>();
