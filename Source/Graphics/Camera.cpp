@@ -19,22 +19,12 @@ Camera::Camera(GameObject& gameObject) : Component(gameObject)
 
 void Camera::Awake()
 {
-	std::cout << "Camera component awake." << std::endl;
+	
 }
 
 void Camera::Start()
 {
-	std::cout << "Camera component started." << std::endl;
-	Player* player = GameObject::Find("Player")->GetComponent<Player>();
-	if (player)
-	{
-		std::cout << "Player component found in Camera Start." << std::endl;
-		player->CustomMethod(); // Call custom method in Player
-	}
-	else
-	{
-		std::cout << "Player component not found in Camera Start." << std::endl;
-	}
+	
 }
 
 void Camera::Update(float deltaTime)
@@ -45,6 +35,7 @@ void Camera::Update(float deltaTime)
 		const Transform& targetTransform = _followTarget->_transform;
 
 		// Calculate camera position (target position + offset)
+		//Vector3 cameraPos = _gameObject._transform._position.Lerp(_followTarget->_transform._position + _followOffset, 10.0f * deltaTime);
 		Vector3 cameraPos = _followTarget->_transform._position + _followOffset;
 
 		// Update camera transform

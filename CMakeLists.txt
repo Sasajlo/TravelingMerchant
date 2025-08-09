@@ -10,9 +10,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# Find required packages
-find_package(OpenGL REQUIRED)
-
 # Set include directories for external libraries
 include_directories(${CMAKE_SOURCE_DIR}/Extern/glfw-3.4.bin.WIN64/include)
 include_directories(${CMAKE_SOURCE_DIR}/Extern/glad/include)
@@ -34,9 +31,15 @@ set(SOURCES
 
     Source/Graphics/Camera.cpp
     Source/Graphics/SpriteRenderer.cpp
+    Source/Graphics/Shader.cpp
+    Source/Graphics/Sprite.cpp
+    Source/Graphics/Texture.cpp
+
+    Source/Physics/Raycast.cpp
 
     Source/Utils/Vector3.cpp
     Source/Utils/Color.cpp
+    Source/Utils/Math.cpp
     
     Extern/glad/src/glad.c
 )
@@ -52,23 +55,27 @@ set(HEADERS
     Source/Core/GameObject.hpp
     Source/Core/Component.hpp
 
+    Source/Graphics/Core.hpp
     Source/Graphics/Camera.hpp
     Source/Graphics/SpriteRenderer.hpp
+    Source/Graphics/Texture.hpp
+
+    Source/Physics/Raycast.hpp
 
     Source/Utils/Vector3.hpp
     Source/Utils/Color.hpp
     Source/Utils/File.hpp
+    Source/Utils/Math.hpp
 )
 
 # Create executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} "Source/Graphics/Shader.cpp" "Source/Graphics/Sprite.cpp")
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Set the GLAD source file to be compiled as C
 set_source_files_properties(Extern/glad/src/glad.c PROPERTIES LANGUAGE C)
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} 
-    OpenGL::GL
     ${CMAKE_SOURCE_DIR}/Extern/glfw-3.4.bin.WIN64/lib-vc2022/glfw3_mt.lib
 )
 

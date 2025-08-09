@@ -1,6 +1,4 @@
 #include <Graphics/Shader.hpp>
-
-#include <glad/glad.h>
 #include <Utils/File.hpp>
 
 using namespace TM::Graphics;

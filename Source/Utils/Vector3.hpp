@@ -1,9 +1,7 @@
 #pragma once
 
 #include <cmath>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <Graphics/Core.hpp>
 
 namespace TM
 {
@@ -38,6 +36,7 @@ namespace TM
 			float SquaredLength() const { return x * x + y * y + z * z; }
 			Vector3 Normalized() const { float mag = Length(); return mag > 0 ? *this / mag : Vector3(); }
 			Vector3 Lerp(Vector3 target, float value);
+			float Distance(const Vector3& other) const { return (other - *this).Length(); }
 
 			Vector3 RotateAroundY(float angle);
 

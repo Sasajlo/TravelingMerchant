@@ -17,9 +17,15 @@ namespace TM
 			~Scene() = default;
 
 			void AddGameObject(std::unique_ptr<GameObject> gameObject);
+			void RemoveGameObject(const std::string& name);
 			
 			// Find GameObject by name across all lifecycle collections
 			GameObject* FindGameObject(const std::string& name);
+			
+			// Find GameObjects by tag across all lifecycle collections
+			std::vector<GameObject*> FindGameObjectsByTag(const std::string& tag);
+
+			std::vector<GameObject*> GetActiveGameObjects();
 
 			void Awake();
 			void Start();

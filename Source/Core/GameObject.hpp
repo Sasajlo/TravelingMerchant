@@ -6,6 +6,7 @@
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 #include "Component.hpp"
 #include "Transform.hpp"
@@ -22,9 +23,14 @@ namespace TM
             GameObject(const std::string& name = "Game Object");
             std::string _name;
 
-            // Component storage using type indices - only smart pointers, no dangling references
-            std::unordered_map<std::type_index, std::unique_ptr<Component>> _asleepComponents;
-            std::unordered_map<std::type_index, std::unique_ptr<Component>> _awakenComponents;
+            // Tag system
+            std::unordered_set<std::string> _tags;
+
+            // Performance collections with raw pointers (no ownership)
+            std::unordered_map<std::type_index, Component*> _asleepComponents;
+            std::unordered_map<std::type_index, Component*> _awakenComponents;
+
+            // Single ownership collection - also serves as active performance collection
             std::unordered_map<std::type_index, std::unique_ptr<Component>> _activeComponents;
 
         public:
@@ -41,80 +47,64 @@ namespace TM
 
             Transform GetTransform() { return _transform; }
 
+            // Tag system methods
+            void AddTag(const std::string& tag);
+            void RemoveTag(const std::string& tag);
+            bool HasTag(const std::string& tag) const;
+            const std::unordered_set<std::string>& GetTags() const { return _tags; }
+            
+            // Static method to find GameObjects by tag in current scene
+            static std::vector<GameObject*> FindByTag(const std::string& tag);
+
             // Component management
             template<typename T>
             T* AddComponent()
             {
-                // Check if component already exists
                 if (HasComponent<T>())
                 {
-                    std::cout << "Component of type " << typeid(T).name() << " already exists on GameObject: " << _name << std::endl;
                     return GetComponent<T>();
                 }
 
-                // Create new component with GameObject reference
                 auto component = std::make_unique<T>(*this);
                 T* componentPtr = component.get();
-                
-                // Store component in asleep collection using type index
+
                 std::type_index typeIndex = std::type_index(typeid(T));
-                _asleepComponents[typeIndex] = std::move(component);
+
+                // Only _activeComponents owns the component
+                _activeComponents[typeIndex] = std::move(component);
                 
-                std::cout << "Added component " << typeid(T).name() << " to GameObject: " << _name << std::endl;
+                // Performance collections just reference the component
+                _asleepComponents[typeIndex] = componentPtr;
+
                 return componentPtr;
             }
 
             template<typename T>
             T* GetComponent()
             {
-                // Check in all component collections
+                // Always get from active collection - stable pointers
                 std::type_index typeIndex = std::type_index(typeid(T));
-                
-                // Check asleep components first
-                auto asleepIt = _asleepComponents.find(typeIndex);
-                if (asleepIt != _asleepComponents.end())
-                {
-                    return static_cast<T*>(asleepIt->second.get());
-                }
-                
-                // Check awakened components
-                auto awakenedIt = _awakenComponents.find(typeIndex);
-                if (awakenedIt != _awakenComponents.end())
-                {
-                    return static_cast<T*>(awakenedIt->second.get());
-                }
-                
-                // Check active components
-                auto activeIt = _activeComponents.find(typeIndex);
-                if (activeIt != _activeComponents.end())
-                {
-                    return static_cast<T*>(activeIt->second.get());
-                }
-                
-                return nullptr;
+                auto it = _activeComponents.find(typeIndex);
+                return it != _activeComponents.end() ? static_cast<T*>(it->second.get()) : nullptr;
             }
 
             template<typename T>
             bool HasComponent() const
             {
                 std::type_index typeIndex = std::type_index(typeid(T));
-                
-                return _asleepComponents.find(typeIndex) != _asleepComponents.end() ||
-                       _awakenComponents.find(typeIndex) != _awakenComponents.end() ||
-                       _activeComponents.find(typeIndex) != _activeComponents.end();
+                return _activeComponents.find(typeIndex) != _activeComponents.end();
             }
 
             template<typename T>
             void RemoveComponent()
             {
                 std::type_index typeIndex = std::type_index(typeid(T));
-                
+
                 // Remove from all collections
                 _asleepComponents.erase(typeIndex);
                 _awakenComponents.erase(typeIndex);
                 _activeComponents.erase(typeIndex);
-                
-                std::cout << "Removed component " << typeid(T).name() << " from GameObject: " << _name << std::endl;
+
             }
 
             // Lifecycle methods

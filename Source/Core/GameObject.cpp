@@ -41,29 +41,58 @@ GameObject* GameObject::Find(const std::string& name)
     return activeScene->FindGameObject(name);
 }
 
+// Tag system implementation
+void GameObject::AddTag(const std::string& tag)
+{
+    _tags.insert(tag);
+}
+
+void GameObject::RemoveTag(const std::string& tag)
+{
+    _tags.erase(tag);
+}
+
+bool GameObject::HasTag(const std::string& tag) const
+{
+    return _tags.find(tag) != _tags.end();
+}
+
+std::vector<GameObject*> GameObject::FindByTag(const std::string& tag)
+{
+    Scene* activeScene = SceneManager::GetActiveScene();
+    if (activeScene == nullptr)
+    {
+        std::cout << "No active scene found. Cannot find GameObjects by tag: " << tag << std::endl;
+        return {};
+    }
+    
+    return activeScene->FindGameObjectsByTag(tag);
+}
+
 void GameObject::Awake()
-{   
-    // Awake all asleep components and move them to awakened collection
+{
+    // Process only asleep components (fast)
     if (!_asleepComponents.empty())
     {
         for (auto& component : _asleepComponents)
         {
+            // Call Awake directly on the component (raw pointer)
             component.second->Awake();
-            _awakenComponents[component.first] = std::move(component.second);
+            _awakenComponents[component.first] = component.second;
         }
         _asleepComponents.clear();
     }
 }
 
 void GameObject::Start()
-{    
-    // Start all awakened components and move them to active collection
+{
+    // Process only awakened components (fast)
     if (!_awakenComponents.empty())
     {
         for (auto& component : _awakenComponents)
         {
+            // Call Start directly on the component (raw pointer)
             component.second->Start();
-            _activeComponents[component.first] = std::move(component.second);
         }
         _awakenComponents.clear();
     }
@@ -71,11 +100,7 @@ void GameObject::Start()
 
 void GameObject::Update(float deltaTime)
 {
-    // Ensure Awake and Start are called for newly added components before Update
-	Awake();
-	Start();
-
-    // Update all active components
+    // Process only active components (fast)
     for (const auto& component : _activeComponents)
     {
         component.second->Update(deltaTime);
@@ -93,8 +118,6 @@ void GameObject::Render()
 
 void GameObject::Destroy()
 {
-    std::cout << "GameObject destroyed: " << _name << std::endl;
-    
     // Destroy all components in all collections
     for (auto& component : _asleepComponents)
     {

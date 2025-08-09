@@ -4,7 +4,7 @@
 #include <Core/Component.hpp>
 #include <Utils/Color.hpp>
 #include <Utils/Vector3.hpp>
-#include <glm/glm.hpp>
+#include <Graphics/Core.hpp>
 
 using namespace TM::Utils;
 using namespace TM::Core;

@@ -48,10 +48,12 @@ void SpriteRenderer::Render()
 
 	// Draw the sprite
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	// Unbind VAO to prevent state pollution
+	glBindVertexArray(0);
 }
 
 void SpriteRenderer::Destroy()
 {
     _shader.Destroy();
-	std::cout << "SpriteRenderer destroyed." << std::endl;
 }

@@ -1,8 +1,11 @@
 #include "Scene.hpp"
 
 #include <iostream>
+#include <Graphics/SpriteRenderer.hpp>
+#include <Graphics/Camera.hpp>
 
 using namespace TM::Core;
+using namespace TM::Graphics;
 
 Scene::Scene(std::string name)
 	: _name(name)
@@ -12,6 +15,32 @@ Scene::Scene(std::string name)
 void Scene::AddGameObject(std::unique_ptr<GameObject> gameObject)
 {
 	_asleepObjects[gameObject->GetName()] = std::move(gameObject);
+}
+
+void Scene::RemoveGameObject(const std::string& name)
+{
+	auto it = _activeObjects.find(name);
+	if (it != _activeObjects.end())
+	{
+		it->second->Destroy(); // Call Destroy logic
+		_activeObjects.erase(it);
+		return;
+	}
+	it = _awakenObjects.find(name);
+	if (it != _awakenObjects.end())
+	{
+		it->second->Destroy(); // Call Destroy logic
+		_awakenObjects.erase(it);
+		return;
+	}
+	it = _asleepObjects.find(name);
+	if (it != _asleepObjects.end())
+	{
+		it->second->Destroy(); // Call Destroy logic
+		_asleepObjects.erase(it);
+		return;
+	}
+	std::cerr << "GameObject '" << name << "' not found in any collection." << std::endl;
 }
 
 GameObject* Scene::FindGameObject(const std::string& name)
@@ -39,6 +68,35 @@ GameObject* Scene::FindGameObject(const std::string& name)
 	
 	// GameObject not found
 	return nullptr;
+}
+
+std::vector<GameObject*> Scene::FindGameObjectsByTag(const std::string& tag)
+{
+	std::vector<GameObject*> foundObjects;
+	
+	// Search in active objects
+	for (auto& gameObject : _activeObjects)
+	{
+		if (gameObject.second->HasTag(tag))
+		{
+			foundObjects.push_back(gameObject.second.get());
+		}
+	}
+	
+	return foundObjects;
+}
+
+std::vector<GameObject*> Scene::GetActiveGameObjects()
+{
+	std::vector<GameObject*> activeObjects;
+	activeObjects.reserve(_activeObjects.size());
+
+	for (const auto& [name, gameObject] : _activeObjects)
+	{
+		activeObjects.push_back(gameObject.get());
+	}
+
+	return activeObjects;
 }
 
 void Scene::Awake()
@@ -78,9 +136,56 @@ void Scene::Update(float deltaTime)
 
 void Scene::Render()
 {
-	for (auto& gameObject : _activeObjects)
-	{
-		gameObject.second->Render();
+	// Get camera position
+	glm::vec3 cameraPos(0.0f, 0.0f, 0.0f);
+	Camera* mainCamera = Camera::GetMain();
+	if (mainCamera) {
+		const Transform& cameraTransform = mainCamera->GetGameObject().GetTransform();
+		cameraPos = glm::vec3(
+			cameraTransform.GetPosition().x,
+			cameraTransform.GetPosition().y,
+			cameraTransform.GetPosition().z
+		);
+	}
+    
+    // Check active objects
+    for (auto& gameObject : _activeObjects) {
+        if (gameObject.second->HasTag("Ground")) {
+            gameObject.second->Render();
+        }
+    }
+    
+    // Then collect and sort all other renderable objects from ALL collections
+    std::vector<std::pair<GameObject*, float>> renderableObjects;
+	
+	for (auto& gameObject : _activeObjects) {
+		// Skip ground objects (already rendered)
+		if (gameObject.second->HasTag("Ground")) {
+			continue;
+		}
+		
+		if (gameObject.second->GetComponent<SpriteRenderer>() != nullptr) {
+			const Transform& objTransform = gameObject.second->GetTransform();
+			glm::vec3 objPos = glm::vec3(
+				objTransform.GetPosition().x,
+				0,
+				objTransform.GetPosition().z
+			);
+			
+			float distance = glm::length(objPos - cameraPos);
+			renderableObjects.emplace_back(gameObject.second.get(), distance);
+		}
+	}
+	
+	// Sort by distance (farthest first)
+	std::sort(renderableObjects.begin(), renderableObjects.end(), 
+		[](const std::pair<GameObject*, float>& a, const std::pair<GameObject*, float>& b) {
+			return a.second > b.second;
+		});
+	
+	// Render other objects
+	for (auto& [gameObject, distance] : renderableObjects) {
+		gameObject->Render();
 	}
 }
 

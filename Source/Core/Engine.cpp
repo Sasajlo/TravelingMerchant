@@ -34,8 +34,8 @@ void Engine::Run()
 		// Handle delta time calculation
 		Instance()._time.Update();
 
-		// Update input states
-		Input::Update();
+		// Poll for events
+		Instance()._window.PollEvents();
 
 		// Update the active scene
 		currentScene->Update(Instance()._time.GetDeltaTime());
@@ -49,8 +49,8 @@ void Engine::Run()
 		// Swap buffers
 		Instance()._window.SwapBuffers();
 
-		// Poll for events
-		Instance()._window.PollEvents();
+		// Reset input states
+		Input::Reset();
 	}
 }
 

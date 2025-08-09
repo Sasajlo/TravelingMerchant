@@ -70,8 +70,8 @@ bool Window::Initialize(const std::string& title, int width, int height)
 	PrintGPUInfo();
 
 	// Enable depth testing for 3D rendering
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LESS);
 
 	// Optional: Enable blending for transparency
 	glEnable(GL_BLEND);
@@ -137,7 +137,7 @@ int Window::GetHeight() const
 void Window::Clear(Color color)
 {
 	glClearColor(color.r, color.g, color.b, color.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear both color and depth buffers
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void Window::SwapBuffers()

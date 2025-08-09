@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Core/GameObject.hpp>
-#include <glad/glad.h>
+#include <Graphics/Texture.hpp>
 
 using namespace TM::Core;
 
@@ -29,6 +29,7 @@ namespace TM
 
 			void SetTexture(std::string texturePath) { _texturePath = texturePath; }
 			void SetPivot(float x, float y);
+			glm::vec2 GetPivot() { return _pivot; }
 
 			unsigned int GetTextureId() const { return _textureId; }
 		};
