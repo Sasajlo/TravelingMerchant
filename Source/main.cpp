@@ -5,6 +5,7 @@
 #include <Graphics/Camera.hpp>
 #include <Graphics/Sprite.hpp>
 #include <Graphics/SpriteRenderer.hpp>
+#include <Graphics/TextRenderer.hpp>
 #include <Utils/Color.hpp>
 #include <Utils/Math.hpp>
 #include <Game/Player.hpp>
@@ -35,6 +36,7 @@ int main()
 	GameObject* playerObject = GameObject::Create("Player");
 	playerObject->AddComponent<Player>();
 	playerObject->_transform.SetScale(1.5f, 1.5f, 0.0f);
+	playerObject->AddTag("Player");
 	Sprite* playerSprite = playerObject->AddComponent<Sprite>();
 	playerSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 	playerSprite->SetTexture("Assets/Textures/player.png");
@@ -111,6 +113,7 @@ int main()
 		GameObject* gameObject = GameObject::Create(name);
 		gameObject->_transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
 		gameObject->_transform.SetScale(0.6f, 0.6f, 0.0f);
+		gameObject->AddTag("Plant");
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
 		sprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/plant.png");
@@ -118,6 +121,16 @@ int main()
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
 	}
+
+	// UI text overlay
+	GameObject* cursorTextObject = GameObject::Create("Cursor Text");
+	auto* cursorText = cursorTextObject->AddComponent<TextRenderer>();
+	cursorText->SetFont("Assets/Fonts/BenidaRounded-Regular.otf", 36.0f);
+	cursorText->SetText("Hello, Merchant!");
+	cursorText->SetPivot(0.0f, 1.0f);
+	cursorTextObject->_transform.SetPosition(20.0f, 40.0f, 0.0f);
+	cursorTextObject->SetActive(false); // Initially hidden
+
 
 	Engine::Run();
 	Engine::Shutdown();

@@ -96,3 +96,33 @@ void Shader::BindUniformMatrix4fv(const std::string& name, const float* value)
 		glUniformMatrix4fv(location, 1, GL_FALSE, value);
 	}
 }
+
+void Shader::BindUniform4f(const std::string& name, float x, float y, float z, float w)
+{
+	int location = glGetUniformLocation(_programId, name.c_str());
+	if (location == -1) {
+		std::cerr << "Warning: uniform '" << name << "' not found in shader program." << std::endl;
+		return;
+	}
+	glUniform4f(location, x, y, z, w);
+}
+
+void Shader::BindUniform2f(const std::string& name, float x, float y)
+{
+	int location = glGetUniformLocation(_programId, name.c_str());
+	if (location == -1) {
+		std::cerr << "Warning: uniform '" << name << "' not found in shader program." << std::endl;
+		return;
+	}
+	glUniform2f(location, x, y);
+}
+
+void Shader::BindUniform1f(const std::string& name, float value)
+{
+	int location = glGetUniformLocation(_programId, name.c_str());
+	if (location == -1) {
+		std::cerr << "Warning: uniform '" << name << "' not found in shader program." << std::endl;
+		return;
+	}
+	glUniform1f(location, value);
+}

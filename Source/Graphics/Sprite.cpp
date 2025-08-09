@@ -11,7 +11,8 @@ unsigned int indices[] = {
 void Sprite::Start()
 {
     // Load the texture using the new Texture class
-    _textureId = Texture::Load(_texturePath);
+    if (_textureId == 0)
+        _textureId = Texture::Load("Assets/Textures/Default/square.png");
 
     // Generate OpenGL objects
     glGenVertexArrays(1, &_VAO);
@@ -26,6 +27,11 @@ void Sprite::Bind()
 {
     glBindVertexArray(_VAO);
     glBindTexture(GL_TEXTURE_2D, _textureId);
+}
+
+void Sprite::SetTexture(std::string texturePath)
+{
+    _textureId = Texture::Load(texturePath);
 }
 
 void Sprite::SetPivot(float x, float y)

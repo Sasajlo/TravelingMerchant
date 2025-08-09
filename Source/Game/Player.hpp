@@ -6,6 +6,7 @@
 #include <Core/SceneManager.hpp>
 #include <Graphics/Camera.hpp>
 #include <Graphics/SpriteRenderer.hpp>
+#include <Graphics/TextRenderer.hpp>
 #include <Physics/Raycast.hpp>
 #include <Game/Interactable.hpp>
 
@@ -37,6 +38,9 @@ namespace TM
 			Interactable* _targetInteractable = nullptr; // Interactable to interact
 
 			Camera* _camera = nullptr;
+            TextRenderer* _cursorText = nullptr;
+
+            Interactable* _hoveredInteractable = nullptr;
 
         public:
 			Player(GameObject& gameObject) : Component(gameObject) {}
@@ -44,6 +48,7 @@ namespace TM
             void Awake() override
             {
 				_camera = Camera::GetMain();
+                _cursorText = GameObject::Find("Cursor Text")->GetComponent<TextRenderer>();
             }
 
             void Start() override
@@ -106,15 +111,51 @@ namespace TM
                 _gameObject._transform._position += rotatedDir * MOVEMENT_SPEED * deltaTime;
 
                 // Handle raycast
-                if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+                auto hit = Raycast::MouseRaycast();
+                if (hit.hitObject && hit.hitObject->HasComponent<Interactable>())
                 {
-                    auto hit = Raycast::MouseRaycast();
-                    if (hit.hitObject && hit.hitObject->HasComponent<Interactable>())
+                    Interactable* interactable = hit.hitObject->GetComponent<Interactable>();
+
+                    // hover toggle
+                    if (_hoveredInteractable != interactable)
                     {
-						CollectResource(hit.hitObject->GetComponent<Interactable>());
+                        if (_hoveredInteractable) _hoveredInteractable->SetHovered(false);
+                        interactable->SetHovered(true);
+                        _hoveredInteractable = interactable;
                     }
 
-                    if (hit.hitObject && hit.hitObject->HasTag("Ground"))
+                    if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+                    {
+                        CollectResource(interactable);
+                    }
+
+                    // Show cursor text
+					std::string cursorText = "Collect " + hit.hitObject->GetName();
+                    if (_cursorText)
+                    {
+                        _cursorText->SetText(interactable->GetInteractionText());
+                        _cursorText->GetGameObject()._transform._position = { 
+                            Input::GetMousePosition().x + 20, 
+                            Input::GetMousePosition().y + 50, 
+                            0 
+                        };
+                        _cursorText->GetGameObject().SetActive(true);
+                    }
+                }
+                else
+                {
+                    if (_hoveredInteractable)
+                    {
+                        _hoveredInteractable->SetHovered(false);
+                        _hoveredInteractable = nullptr;
+                    }
+
+                    _cursorText->GetGameObject().SetActive(false);
+                }
+
+                if (hit.hitObject && hit.hitObject->HasTag("Ground"))
+                {
+                    if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
                     {
                         MoveTo(hit.hitPoint);
                     }

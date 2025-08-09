@@ -112,7 +112,7 @@ Raycast::HitResult Raycast::RaycastAll(const Ray& ray)
 	for (GameObject* gameObject : activeObjects)
 	{
 		// Skip objects without SpriteRenderer
-		if (!gameObject->GetComponent<SpriteRenderer>()) continue;
+		if (!gameObject->GetComponent<SpriteRenderer>() || gameObject->HasTag("Player")) continue;
 
 		HitResult hit = RaycastSprite(ray, gameObject);
 		if (hit.hit && hit.distance < closestHit.distance)

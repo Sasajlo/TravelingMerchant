@@ -23,6 +23,9 @@ namespace TM
 
 			void BindUniform1i(const std::string& name, int value);
 			void BindUniformMatrix4fv(const std::string& name, const float* value);
+			void BindUniform4f(const std::string& name, float x, float y, float z, float w);
+			void BindUniform2f(const std::string& name, float x, float y);
+			void BindUniform1f(const std::string& name, float value);
 		};
 	}
 }

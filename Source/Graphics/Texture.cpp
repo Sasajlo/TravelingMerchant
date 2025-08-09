@@ -1,10 +1,12 @@
 #include <Graphics/Texture.hpp>
 
+#include <iostream>
+
 // Include stb_image for texture loading
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../Extern/stb_image.h"
-
-#include <iostream>
+#endif
 
 namespace TM
 {

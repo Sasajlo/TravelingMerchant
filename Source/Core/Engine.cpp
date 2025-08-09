@@ -3,6 +3,7 @@
 #include <Core/Input.hpp>
 #include <Core/SceneManager.hpp>
 #include <Graphics/Camera.hpp>
+#include <Graphics/Texture.hpp>
 
 using namespace TM::Core;
 using namespace TM::Graphics;
@@ -64,6 +65,7 @@ void Engine::Shutdown()
 	std::cout << "Engine shutting down!" << std::endl;
 	SceneManager::Destroy();
 	Instance()._window.Destroy();
+	Texture::ClearCache();
 }
 
 void Engine::RenderFPS(int fps)

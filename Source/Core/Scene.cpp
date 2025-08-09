@@ -3,6 +3,7 @@
 #include <iostream>
 #include <Graphics/SpriteRenderer.hpp>
 #include <Graphics/Camera.hpp>
+#include <Graphics/TextRenderer.hpp> // add this
 
 using namespace TM::Core;
 using namespace TM::Graphics;
@@ -164,8 +165,10 @@ void Scene::Render()
 	}
 
 	for (auto& gameObject : _activeObjects) {
+		if (!gameObject.second->IsActive()) continue;
+
 		// Skip ground objects (already rendered)
-		if (gameObject.second->HasTag("Ground")) continue;
+		if (gameObject.second->HasTag("Ground") || gameObject.second->HasTag("UI")) continue;
 
 		if (gameObject.second->GetComponent<SpriteRenderer>() != nullptr) {
 			const Transform& objTransform = gameObject.second->GetTransform();
@@ -207,6 +210,15 @@ void Scene::Render()
 	// Render other objects
 	for (auto& [gameObject, distance] : renderableObjects) {
 		gameObject->Render();
+	}
+
+	// Overlay text pass (render all TextRenderer components last, in screen space)
+	for (auto& it : _activeObjects) {
+		if (!it.second->IsActive()) continue;
+		if (auto* tr = it.second->GetComponent<TM::Graphics::TextRenderer>())
+		{
+			tr->Render();
+		}
 	}
 }
 

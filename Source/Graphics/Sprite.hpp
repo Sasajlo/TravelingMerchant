@@ -13,8 +13,7 @@ namespace TM
 		{
 		private:
 			unsigned int _VBO, _VAO, _EBO;
-			unsigned int _textureId;
-			std::string _texturePath = "Assets/Textures/Default/square.png"; // Default texture path
+			unsigned int _textureId = 0;
 			glm::vec2 _pivot = glm::vec2(0.5f, 0.5f); // Default pivot at center
 
 			void UpdateVertexData(); // Update vertex positions based on pivot
@@ -27,7 +26,7 @@ namespace TM
 
 			void Bind();
 
-			void SetTexture(std::string texturePath) { _texturePath = texturePath; }
+			void SetTexture(std::string texturePath);
 			void SetPivot(float x, float y);
 			glm::vec2 GetPivot() { return _pivot; }
 

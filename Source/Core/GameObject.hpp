@@ -22,6 +22,7 @@ namespace TM
         private:
             GameObject(const std::string& name = "Game Object");
             std::string _name;
+			bool _isActive = true;
 
             // Tag system
             std::unordered_set<std::string> _tags;
@@ -44,6 +45,10 @@ namespace TM
             static GameObject* Find(const std::string& name);
 
             const std::string& GetName() const { return _name; }
+			void SetName(const std::string& name) { _name = name; }
+
+			const bool IsActive() const { return _isActive; }
+			void SetActive(bool active) { _isActive = active; }
 
             Transform GetTransform() { return _transform; }
 

@@ -31,6 +31,7 @@ set(SOURCES
 
     Source/Graphics/Camera.cpp
     Source/Graphics/SpriteRenderer.cpp
+    Source/Graphics/TextRenderer.cpp
     Source/Graphics/Shader.cpp
     Source/Graphics/Sprite.cpp
     Source/Graphics/Texture.cpp
@@ -58,6 +59,7 @@ set(HEADERS
     Source/Graphics/Core.hpp
     Source/Graphics/Camera.hpp
     Source/Graphics/SpriteRenderer.hpp
+    Source/Graphics/TextRenderer.hpp
     Source/Graphics/Texture.hpp
 
     Source/Physics/Raycast.hpp
