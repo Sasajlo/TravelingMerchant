@@ -98,7 +98,7 @@ int main()
 		gameObject->_transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
 		gameObject->_transform.SetScale(1.5f, 1.5f, 0.0f);
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
-		sprite->SetPivot(0.5f, 0.1f); // Set pivot to center
+		sprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/berry_bush.png");
 		gameObject->AddComponent<SpriteRenderer>();
 		gameObject->AddComponent<Billboard>();
@@ -110,9 +110,9 @@ int main()
 		std::string name = "Plant " + std::to_string(i);
 		GameObject* gameObject = GameObject::Create(name);
 		gameObject->_transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		gameObject->_transform.SetScale(0.5f, 0.5f, 0.0f);
+		gameObject->_transform.SetScale(0.6f, 0.6f, 0.0f);
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
-		sprite->SetPivot(0.5f, 0.1f); // Set pivot to center
+		sprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/plant.png");
 		gameObject->AddComponent<SpriteRenderer>();
 		gameObject->AddComponent<Billboard>();

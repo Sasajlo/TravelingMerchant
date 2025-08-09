@@ -155,26 +155,47 @@ void Scene::Render()
         }
     }
     
-    // Then collect and sort all other renderable objects from ALL collections
-    std::vector<std::pair<GameObject*, float>> renderableObjects;
-	
+	std::vector<std::pair<GameObject*, float>> renderableObjects;
+
+	glm::mat4 V(1.0f), P(1.0f);
+	if (mainCamera) {
+		V = mainCamera->GetViewMatrix();
+		P = mainCamera->GetProjectionMatrix();
+	}
+
 	for (auto& gameObject : _activeObjects) {
 		// Skip ground objects (already rendered)
-		if (gameObject.second->HasTag("Ground")) {
-			continue;
-		}
-		
+		if (gameObject.second->HasTag("Ground")) continue;
+
 		if (gameObject.second->GetComponent<SpriteRenderer>() != nullptr) {
 			const Transform& objTransform = gameObject.second->GetTransform();
-			glm::vec3 objPos = glm::vec3(
+			glm::vec3 worldPos(
 				objTransform.GetPosition().x,
-				0,
+				objTransform.GetPosition().y,
 				objTransform.GetPosition().z
 			);
-			
-			float distance = glm::length(objPos - cameraPos);
-			renderableObjects.emplace_back(gameObject.second.get(), distance);
+
+			// Project to clip space, then to NDC
+			glm::vec4 clip = P * V * glm::vec4(worldPos, 1.0f);
+			if (clip.w == 0.0f) continue;
+
+			float ndcY = clip.y / clip.w; // -1 bottom ... +1 top
+
+			// Optional: use depth as tie-breaker if needed
+			//float ndcZ = clip.z / clip.w;
+
+			renderableObjects.emplace_back(gameObject.second.get(), ndcY);
 		}
+	}
+
+	std::sort(renderableObjects.begin(), renderableObjects.end(),
+		[](const std::pair<GameObject*, float>& a, const std::pair<GameObject*, float>& b) {
+			return a.second > b.second; // top first, bottom last (in front)
+		});
+
+	// Render other objects
+	for (auto& [gameObject, ndcY] : renderableObjects) {
+		gameObject->Render();
 	}
 	
 	// Sort by distance (farthest first)
