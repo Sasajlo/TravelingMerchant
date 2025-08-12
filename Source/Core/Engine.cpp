@@ -8,10 +8,10 @@
 using namespace TM::Core;
 using namespace TM::Graphics;
 
-bool Engine::Initialize(const std::string& title, int width, int height)
+bool Engine::Initialize(const std::string& title, int width, int height, bool fullscreen)
 {
 	// Initialize window
-	if (!Instance()._window.Initialize(title, width, height)) {
+	if (!Instance()._window.Initialize(title, width, height, fullscreen)) {
 		std::cerr << "Failed to initialize window!" << std::endl;
 		return false;
 	};
@@ -38,14 +38,22 @@ void Engine::Run()
 		// Poll for events
 		Instance()._window.PollEvents();
 
-		// Update the active scene
-		currentScene->Update(Instance()._time.GetDeltaTime());
+		if (Input::IsKeyPressed(GLFW_KEY_F11)) {
+			Instance()._window.ToggleFullscreen();
+		}
 
-		// Clear the window from previous frame
-		Instance()._window.Clear(Camera::GetMain()->GetBackgroundColor());
+		// Check if window is minimized
+		if (GetWindowSize().width != 0 && GetWindowSize().height != 0)
+		{
+			// Update the active scene
+			currentScene->Update(Instance()._time.GetDeltaTime());
 
-		// Render the active scene
-		currentScene->Render();
+			// Clear the window from previous frame
+			Instance()._window.Clear(Camera::GetMain()->GetBackgroundColor());
+
+			// Render the active scene
+			currentScene->Render();
+		}
 
 		// Swap buffers
 		Instance()._window.SwapBuffers();

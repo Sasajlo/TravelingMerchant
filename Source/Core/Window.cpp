@@ -27,7 +27,7 @@ void Window::FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 	std::cout << "Framebuffer resized: " << width << "x" << height << std::endl;
 }
 
-bool Window::Initialize(const std::string& title, int width, int height)
+bool Window::Initialize(const std::string& title, int width, int height, bool fullscreen)
 {
 	// Initialize GLFW
 	if (!glfwInit()) {
@@ -55,6 +55,8 @@ bool Window::Initialize(const std::string& title, int width, int height)
 		return false;
 	}
 
+	// Maximize the window
+	glfwMaximizeWindow(_window);
 
 	// Set the window's context	
 	glfwMakeContextCurrent(_window);
@@ -69,16 +71,12 @@ bool Window::Initialize(const std::string& title, int width, int height)
 	// Print GPU information
 	PrintGPUInfo();
 
-	// Enable depth testing for 3D rendering
-	//glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LESS);
-
-	// Optional: Enable blending for transparency
+	// Enable blending for transparency
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	// Viewport
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, GetWidth(), GetHeight());
 
 	// Set the framebuffer size callback
 	glfwSetFramebufferSizeCallback(_window, FramebufferSizeCallback);
@@ -89,7 +87,12 @@ bool Window::Initialize(const std::string& title, int width, int height)
 	// Initialize Input system
 	Input::Initialize(_window);
 
-	int _width, _height;
+	_windowedWidth = width;
+	_windowedHeight = height;
+
+	if (fullscreen)
+		ToggleFullscreen();
+
 	std::cout << "Window initialized: " << glfwGetWindowTitle(_window) << " (" << GetWidth() << "x" << GetHeight() << ")" << std::endl;
 	return true;
 }
@@ -124,6 +127,7 @@ int Window::GetWidth() const
 
 	int width, height;
 	glfwGetWindowSize(_window, &width, &height);
+
 	return width;
 }
 
@@ -132,6 +136,23 @@ int Window::GetHeight() const
 	int width, height;
 	glfwGetWindowSize(_window, &width, &height);
 	return height;
+}
+
+void Window::ToggleFullscreen()
+{
+	_isFullscreen = !_isFullscreen;
+
+	if (_isFullscreen) {
+		glfwGetWindowPos(_window, &_windowedX, &_windowedY);
+		glfwGetWindowSize(_window, &_windowedWidth, &_windowedHeight);
+
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		glfwSetWindowMonitor(_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+	}
+	else {
+		glfwSetWindowMonitor(_window, nullptr, _windowedX, _windowedY, _windowedWidth, _windowedHeight, 0);
+	}
 }
 
 void Window::Clear(Color color)

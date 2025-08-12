@@ -34,9 +34,21 @@ namespace TM
             // Single ownership collection - also serves as active performance collection
             std::unordered_map<std::type_index, std::unique_ptr<Component>> _activeComponents;
 
+            // Components marked for removal - processed after Update/Render
+            std::vector<std::type_index> _componentsToRemove;
+
+            // Parent-child hierarchy
+            GameObject* _parent = nullptr;
+            std::vector<GameObject*> _children;
+            std::vector<std::unique_ptr<GameObject>> _childrenOwnership; // Own child GameObjects
+
+            // Child lifecycle collections
+            std::vector<GameObject*> _asleepChildren;
+            std::vector<GameObject*> _awakenChildren;
+
         public:
             ~GameObject() = default;
-			Transform _transform; // Built-in Transform component
+			Transform transform; // Built-in Transform component
 
 
             static GameObject* Create(const std::string& name = "Game Object");
@@ -47,10 +59,10 @@ namespace TM
             const std::string& GetName() const { return _name; }
 			void SetName(const std::string& name) { _name = name; }
 
-			const bool IsActive() const { return _isActive; }
+            const bool IsActive() const { return (!_parent || !_isActive) ? _isActive : _parent->IsActive(); }
 			void SetActive(bool active) { _isActive = active; }
 
-            Transform GetTransform() { return _transform; }
+            Transform GetTransform() { return transform; }
 
             // Tag system methods
             void AddTag(const std::string& tag);
@@ -60,6 +72,16 @@ namespace TM
             
             // Static method to find GameObjects by tag in current scene
             static std::vector<GameObject*> FindByTag(const std::string& tag);
+
+            // Parent-child hierarchy methods
+            void SetParent(GameObject* parent);
+            GameObject* GetParent() const { return _parent; }
+            const std::vector<GameObject*>& GetChildren() const { return _children; }
+            void AddChild(GameObject* child);
+            void RemoveChild(GameObject* child);
+            bool IsRoot() const { return _parent == nullptr; }
+            bool HasChildren() const { return !_children.empty(); }
+            GameObject* CreateChild(const std::string& name = "Child Object");
 
             // Component management
             template<typename T>
@@ -105,12 +127,15 @@ namespace TM
             {
                 std::type_index typeIndex = std::type_index(typeid(T));
 
-                // Remove from all collections
-                _asleepComponents.erase(typeIndex);
-                _awakenComponents.erase(typeIndex);
-                _activeComponents.erase(typeIndex);
-
+                // Mark component for removal instead of immediately removing
+                if (HasComponent<T>())
+                {
+                    _componentsToRemove.push_back(typeIndex);
+                }
             }
+
+            // Process components marked for removal
+            void RemoveComponents();
 
             // Lifecycle methods
             void Awake();

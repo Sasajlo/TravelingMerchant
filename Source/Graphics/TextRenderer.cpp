@@ -64,7 +64,9 @@ void TextRenderer::SetFont(const std::string& path, float pixelHeight)
 
 void TextRenderer::Awake()
 {
-    _shader.Load("Shaders/UIText.vert", "Shaders/UIText.frag");
+    _gameObject.AddTag("UI");
+
+    _shader.Load("Shaders/TextUI.vert", "Shaders/TextUI.frag");
 
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
@@ -124,8 +126,9 @@ void TextRenderer::Render()
     float offsetY = minY + _pivot.y * (maxY - minY);
 
     // Second pass: build vertices with pivot offset, then translate to object position
-    float posX = _gameObject._transform._position.x;
-    float posY = _gameObject._transform._position.y;
+    Vector3 worldPos = _gameObject.transform.GetWorldPosition();
+    float posX = worldPos.x;
+    float posY = worldPos.y;
     xLocal = 0.0f; yLocal = 0.0f;
 
     for (char c : _text) {

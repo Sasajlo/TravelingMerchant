@@ -1,16 +1,14 @@
 #pragma once
 
 #include <iostream>
-#include <Core/Component.hpp>
-#include <Core/Input.hpp>
-#include <Core/SceneManager.hpp>
+#include <Core/Core.hpp>
 #include <Graphics/Camera.hpp>
 #include <Graphics/SpriteRenderer.hpp>
 #include <Graphics/TextRenderer.hpp>
 #include <Physics/Raycast.hpp>
 #include <Game/Interactable.hpp>
 
-using namespace TM::Core;
+//using namespace TM::Core;
 using namespace TM::Graphics;
 using namespace TM::Physics;
 
@@ -108,7 +106,17 @@ namespace TM
                 rotatedDir.z = direction.x * sinA + direction.z * cosA;
                 rotatedDir.y = 0.0f; // No vertical movement
 
-                _gameObject._transform._position += rotatedDir * MOVEMENT_SPEED * deltaTime;
+                _gameObject.transform.position += rotatedDir * MOVEMENT_SPEED * deltaTime;
+
+                // Update cursor text
+                if (_cursorText)
+                {
+                    _cursorText->GetGameObject().transform.position = {
+                        Input::GetMousePosition().x + 20,
+                        Input::GetMousePosition().y + 50,
+                        0
+                    };
+                }
 
                 // Handle raycast
                 auto hit = Raycast::MouseRaycast();
@@ -130,16 +138,10 @@ namespace TM
                     }
 
                     // Show cursor text
-					std::string cursorText = "Collect " + hit.hitObject->GetName();
                     if (_cursorText)
                     {
                         _cursorText->SetText(interactable->GetInteractionText());
-                        _cursorText->GetGameObject()._transform._position = { 
-                            Input::GetMousePosition().x + 20, 
-                            Input::GetMousePosition().y + 50, 
-                            0 
-                        };
-                        _cursorText->GetGameObject().SetActive(true);
+                        _cursorText->SetActive(true);
                     }
                 }
                 else
@@ -150,7 +152,7 @@ namespace TM
                         _hoveredInteractable = nullptr;
                     }
 
-                    _cursorText->GetGameObject().SetActive(false);
+                    _cursorText->SetActive(false);
                 }
 
                 if (hit.hitObject && hit.hitObject->HasTag("Ground"))
@@ -161,42 +163,20 @@ namespace TM
                     }
                 }
 
-				// Handle moving to target position
-                if (_goToTarget)
-                {
-                    Vector3 currentPosition = _gameObject._transform._position;
-                    Vector3 directionToTarget = _targetPosition - currentPosition;
-                    if (directionToTarget.Length() < 0.1f)
-                    {
-                        if (_targetInteractable)
-                        {
-                            _targetInteractable->Interact(); // Collect resource when close enough
-                            _targetInteractable = nullptr; // Clear target resource
-						}
-
-                        _goToTarget = false; // Stop moving when close enough
-                    }
-                    else
-                    {
-                        directionToTarget = directionToTarget.Normalized();
-                        _gameObject._transform._position += directionToTarget * MOVEMENT_SPEED * deltaTime;
-                    }
-				}
-
                 if (Input::IsKeyHeld(GLFW_KEY_SPACE))
                 {
                     auto objects = SceneManager::GetActiveScene()->GetActiveGameObjects();
 
                     GameObject* closest = nullptr;
                     float closestDistSq = std::numeric_limits<float>::infinity();
-                    const Vector3 myPos = _gameObject._transform._position;
+                    const Vector3 myPos = _gameObject.transform.position;
 
                     for (auto* go : objects)
                     {
                         if (go == &_gameObject) continue;
                         if (!go->HasComponent<Interactable>()) continue;
 
-                        Vector3 d = go->_transform._position - myPos;
+                        Vector3 d = go->transform.position - myPos;
                         float distSq = d.SquaredLength();
                         if (distSq < closestDistSq)
                         {
@@ -210,6 +190,28 @@ namespace TM
                     {
                         CollectResource(closest->GetComponent<Interactable>());
                     }
+                }
+
+				// Handle moving to target position
+                if (_goToTarget)
+                {
+                    Vector3 currentPosition = _gameObject.transform.position;
+                    Vector3 directionToTarget = _targetPosition - currentPosition;
+                    if (directionToTarget.Length() < 0.1f)
+                    {
+                        if (_targetInteractable)
+                        {
+                            _targetInteractable->Interact(&_gameObject); // Collect resource when close enough
+                            _targetInteractable = nullptr; // Clear target resource
+						}
+
+                        _goToTarget = false; // Stop moving when close enough
+                    }
+                    else
+                    {
+                        directionToTarget = directionToTarget.Normalized();
+                        _gameObject.transform.position += directionToTarget * MOVEMENT_SPEED * deltaTime;
+                    }
 				}
             }
 
@@ -217,7 +219,7 @@ namespace TM
             {
 				if (!resource) return;
 				_targetInteractable = resource;
-				MoveTo(resource->GetGameObject()._transform._position);
+				MoveTo(resource->GetGameObject().transform.position);
 			}
 
             void MoveTo(Vector3 targetPosition)

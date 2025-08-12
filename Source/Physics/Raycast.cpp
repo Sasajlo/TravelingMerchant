@@ -2,6 +2,8 @@
 #include <Core/Engine.hpp>
 #include <Core/SceneManager.hpp>
 #include <Graphics/SpriteRenderer.hpp>
+#include <Graphics/ImageRenderer.hpp>
+#include <Graphics/TextRenderer.hpp>
 #include <algorithm>
 
 using namespace TM::Utils;
@@ -49,7 +51,7 @@ Raycast::HitResult Raycast::RaycastSprite(const Ray& rayWorld, GameObject* go)
 	if (!sprite) return result;
 
 	// Model matrix
-	const glm::mat4 M = go->_transform.GetModelMatrix();
+	const glm::mat4 M = go->transform.GetModelMatrix();
 
 	// Basis (columns) and scales along local X/Y in world space
 	const glm::vec3 colX = glm::vec3(M[0]);  // scaled right
@@ -97,6 +99,72 @@ Raycast::HitResult Raycast::RaycastSprite(const Ray& rayWorld, GameObject* go)
 	return result;
 }
 
+Raycast::HitResult Raycast::RaycastUI(Vector3 mousePos, GameObject* gameObject)
+{
+	// Check children first (uncomment this if you want to check child UI elements)
+	auto children = gameObject->GetChildren();
+	std::reverse(children.begin(), children.end());
+	for (auto& child : children)
+	{
+		auto result = RaycastUI(mousePos, child);
+		if (result.hit) return result;
+	}
+
+	// Check if this is a UI element
+	if (!gameObject->HasTag("UI")) {
+		HitResult hit;
+		return hit;
+	}
+
+	// Get the UI element's screen position and size
+	Vector3 screenPos = gameObject->transform.GetWorldPosition(); // Use local position for UI
+	Size size(0, 0);
+
+	// Check for ImageRenderer
+	if (auto* imageRenderer = gameObject->GetComponent<ImageRenderer>()) {
+		size = imageRenderer->GetSize();
+	}
+	// Check for TextRenderer
+	//else if (auto* textRenderer = gameObject->GetComponent<TextRenderer>()) {
+	//	// Get text bounds (you might need to implement this in TextRenderer)
+	//	size = textRenderer->GetSize(); // Assuming this exists
+	//}
+	else {
+		HitResult hit;
+		return hit;
+	}
+
+	// Account for pivot point
+	Vector3 pivot = Vector3(0.5f, 0.5f, 0.0f); // Default pivot
+	if (auto* imageRenderer = gameObject->GetComponent<ImageRenderer>()) {
+		pivot = imageRenderer->GetPivot();
+	}
+	//else if (auto* textRenderer = gameObject->GetComponent<TextRenderer>()) {
+	//	pivot = textRenderer->GetPivot();
+	//}
+
+	// Calculate actual bounds considering pivot
+	float left = screenPos.x - (size.width * pivot.x);
+	float right = screenPos.x + (size.width * (1.0f - pivot.x));
+	float bottom = screenPos.y - (size.height * pivot.y);
+	float top = screenPos.y + (size.height * (1.0f - pivot.y));
+
+	// Check if mouse is within bounds
+	if (mousePos.x >= left && mousePos.x <= right &&
+		mousePos.y >= bottom && mousePos.y <= top)
+	{
+		HitResult uiHit;
+		uiHit.ui = true;
+		uiHit.hitPoint = { mousePos.x, mousePos.y, 0.0f };
+		uiHit.hitObject = gameObject;
+		uiHit.hit = true;
+		return uiHit;
+	}
+
+	HitResult hit;
+	return hit;
+}
+
 Raycast::HitResult Raycast::RaycastAll(const Ray& ray)
 {
 	HitResult closestHit;
@@ -111,6 +179,8 @@ Raycast::HitResult Raycast::RaycastAll(const Ray& ray)
 
 	for (GameObject* gameObject : activeObjects)
 	{
+		if (!gameObject->IsActive() || gameObject->HasTag("UI")) continue;
+
 		// Skip objects without SpriteRenderer
 		if (!gameObject->GetComponent<SpriteRenderer>() || gameObject->HasTag("Player")) continue;
 
@@ -128,10 +198,34 @@ Raycast::HitResult Raycast::MouseRaycast()
 {
 	Vector3 mousePos = Input::GetMousePosition();
 
-	// Get window size (you might need to add this to Window class)
-	int width = Engine::GetWindowSize().width; 
+	// Get window size
+	int width = Engine::GetWindowSize().width;
 	int height = Engine::GetWindowSize().height;
 
+	if (width == 0 || height == 0)
+	{
+		HitResult result;
+		result.hit = false;
+		return result;
+	}
+
+	// Check if mouse is over any UI element first
+	Scene* activeScene = SceneManager::GetActiveScene();
+	if (activeScene)
+	{
+		auto activeObjects = activeScene->GetActiveGameObjects();
+		std::reverse(activeObjects.begin(), activeObjects.end());
+
+		for (auto gameObject : activeObjects)
+		{
+			if (!gameObject->IsActive()) continue;
+
+			auto result = RaycastUI(mousePos, gameObject);
+			if (result.hit) return result;
+		}
+	}
+
+	// If no UI element is hit, do normal world raycast
 	Ray ray = ScreenPointToRay(mousePos.x, mousePos.y, width, height);
 	return RaycastAll(ray);
 }

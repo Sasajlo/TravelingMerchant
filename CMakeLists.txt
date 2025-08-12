@@ -28,10 +28,12 @@ set(SOURCES
     Source/Core/Input.cpp
     Source/Core/GameObject.cpp
     Source/Core/Component.cpp
+    Source/Core/Transform.cpp
 
     Source/Graphics/Camera.cpp
     Source/Graphics/SpriteRenderer.cpp
     Source/Graphics/TextRenderer.cpp
+    Source/Graphics/ImageRenderer.cpp
     Source/Graphics/Shader.cpp
     Source/Graphics/Sprite.cpp
     Source/Graphics/Texture.cpp
@@ -47,6 +49,7 @@ set(SOURCES
 
 # Add header files
 set(HEADERS
+    Source/Core/Core.hpp
     Source/Core/Engine.hpp
     Source/Core/Scene.hpp
     Source/Core/SceneManager.hpp
@@ -55,19 +58,34 @@ set(HEADERS
     Source/Core/Input.hpp
     Source/Core/GameObject.hpp
     Source/Core/Component.hpp
+    Source/Core/Transform.hpp
 
-    Source/Graphics/Core.hpp
+    Source/Graphics/Graphics.hpp
     Source/Graphics/Camera.hpp
+    Source/Graphics/Sprite.hpp
+    Source/Graphics/Shader.hpp
     Source/Graphics/SpriteRenderer.hpp
+    Source/Graphics/ImageRenderer.hpp
     Source/Graphics/TextRenderer.hpp
     Source/Graphics/Texture.hpp
 
+    Source/Physics/Physics.hpp
     Source/Physics/Raycast.hpp
 
+    Source/Utils/Utils.hpp
     Source/Utils/Vector3.hpp
     Source/Utils/Color.hpp
     Source/Utils/File.hpp
     Source/Utils/Math.hpp
+    Source/Utils/Size.hpp
+
+    Source/Game/Game.hpp
+    Source/Game/Player.hpp
+    Source/Game/Debug.hpp
+    Source/Game/Billboard.hpp
+    Source/Game/Interactable.hpp
+
+    Source/Game/Player/Inventory.hpp
 )
 
 # Create executable

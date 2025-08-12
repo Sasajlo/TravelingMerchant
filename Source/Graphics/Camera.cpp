@@ -14,7 +14,7 @@ Camera* Camera::_mainCamera = nullptr; // Initialize static member
 Camera::Camera(GameObject& gameObject) : Component(gameObject)
 {
 	if (!_mainCamera) _mainCamera = this;
-	_gameObject._transform._position.z = 10.0f; // Default position behind the camera
+	_gameObject.transform.position.z = 10.0f; // Default position behind the camera
 }
 
 void Camera::Awake()
@@ -32,21 +32,20 @@ void Camera::Update(float deltaTime)
 	if (_followTarget)
 	{
 		// Get target position
-		const Transform& targetTransform = _followTarget->_transform;
+		const Transform& targetTransform = _followTarget->transform;
 
 		// Calculate camera position (target position + offset)
-		//Vector3 cameraPos = _gameObject._transform._position.Lerp(_followTarget->_transform._position + _followOffset, 10.0f * deltaTime);
-		Vector3 cameraPos = _followTarget->_transform._position + _followOffset;
+		Vector3 cameraPos = _followTarget->transform.position + _followOffset;
 
 		// Update camera transform
-		_gameObject._transform.SetPosition(cameraPos.x, cameraPos.y, cameraPos.z);
+		_gameObject.transform.SetPosition(cameraPos.x, cameraPos.y, cameraPos.z);
 	}
 
 	if (_lookAtTarget)
 	{
-		const Transform& targetTransform = _lookAtTarget->_transform;
+		const Transform& targetTransform = _lookAtTarget->transform;
 		// Calculate rotation to face target
-		Vector3 dir = targetTransform._position - _gameObject._transform._position;
+		Vector3 dir = targetTransform.position - _gameObject.transform.position;
 		dir = dir.Normalized();
 
 		auto quaternion = glm::quatLookAt(
@@ -57,7 +56,7 @@ void Camera::Update(float deltaTime)
 		glm::vec3 eulerRadians = glm::eulerAngles(quaternion);
 
 		// Convert to degrees for your transform
-		_gameObject._transform._rotation = { glm::degrees(eulerRadians.x), glm::degrees(eulerRadians.y), glm::degrees(eulerRadians.z) };
+		_gameObject.transform.rotation = { glm::degrees(eulerRadians.x), glm::degrees(eulerRadians.y), glm::degrees(eulerRadians.z) };
 	}
 }
 
@@ -80,9 +79,9 @@ glm::mat4 Camera::GetViewMatrix() const
 {
 	// Calculate camera position and target
 	glm::vec3 cameraPos = glm::vec3(
-		_gameObject._transform._position.x,
-		_gameObject._transform._position.y,
-		_gameObject._transform._position.z
+		_gameObject.transform.position.x,
+		_gameObject.transform.position.y,
+		_gameObject.transform.position.z
 	);
 
 	// Calculate target position
@@ -99,9 +98,9 @@ glm::mat4 Camera::GetViewMatrix() const
 	else {
 		// Look in the direction the camera is facing
 		glm::vec3 cameraRotation = glm::vec3(
-			glm::radians(_gameObject._transform._rotation.x),
-			glm::radians(_gameObject._transform._rotation.y),
-			glm::radians(_gameObject._transform._rotation.z)
+			glm::radians(_gameObject.transform.rotation.x),
+			glm::radians(_gameObject.transform.rotation.y),
+			glm::radians(_gameObject.transform.rotation.z)
 		);
 
 		// Calculate forward direction

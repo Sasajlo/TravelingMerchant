@@ -3,7 +3,8 @@
 #include <iostream>
 #include <Graphics/SpriteRenderer.hpp>
 #include <Graphics/Camera.hpp>
-#include <Graphics/TextRenderer.hpp> // add this
+#include <Graphics/TextRenderer.hpp> 
+#include <Graphics/ImageRenderer.hpp>
 
 using namespace TM::Core;
 using namespace TM::Graphics;
@@ -66,8 +67,44 @@ GameObject* Scene::FindGameObject(const std::string& name)
 	{
 		return activeIt->second.get();
 	}
-	
-	// GameObject not found
+
+	for (auto& gameObject : _asleepObjects)
+	{ 
+		auto result = FindGameObjectInHierarchy(name, gameObject.second.get());
+		if (result) return result;
+	}
+
+	for (auto& gameObject : _awakenObjects)
+	{
+		auto result = FindGameObjectInHierarchy(name, gameObject.second.get());
+		if (result) return result;
+	}
+
+	for (auto& gameObject : _activeObjects)
+	{
+		auto result = FindGameObjectInHierarchy(name, gameObject.second.get());
+		if (result) return result;
+	}
+
+	return nullptr;
+}
+
+GameObject* Scene::FindGameObjectInHierarchy(const std::string& name, GameObject* root)
+{
+	if (!root) return nullptr;
+
+	if (root->GetName() == name)
+	{
+		return root;
+	}
+
+	// Search in children
+	for (GameObject* child : root->GetChildren())
+	{
+		GameObject* result = FindGameObjectInHierarchy(name, child);
+		if (result) return result;
+	}
+
 	return nullptr;
 }
 
@@ -75,29 +112,64 @@ std::vector<GameObject*> Scene::FindGameObjectsByTag(const std::string& tag)
 {
 	std::vector<GameObject*> foundObjects;
 	
-	// Search in active objects
+	// Search in active objects (root objects only)
 	for (auto& gameObject : _activeObjects)
 	{
-		if (gameObject.second->HasTag(tag))
-		{
-			foundObjects.push_back(gameObject.second.get());
-		}
+		FindGameObjectsByTagInHierarchy(tag, gameObject.second.get(), foundObjects);
 	}
 	
 	return foundObjects;
 }
 
-std::vector<GameObject*> Scene::GetActiveGameObjects()
+void Scene::FindGameObjectsByTagInHierarchy(const std::string& tag, GameObject* root, std::vector<GameObject*>& results)
 {
-	std::vector<GameObject*> activeObjects;
-	activeObjects.reserve(_activeObjects.size());
+	if (root->HasTag(tag))
+	{
+		results.push_back(root);
+	}
+
+	// Search in children
+	for (GameObject* child : root->GetChildren())
+	{
+		FindGameObjectsByTagInHierarchy(tag, child, results);
+	}
+}
+
+std::vector<GameObject*> Scene::GetRootGameObjects()
+{
+	std::vector<GameObject*> rootObjects;
+	rootObjects.reserve(_activeObjects.size());
 
 	for (const auto& [name, gameObject] : _activeObjects)
 	{
-		activeObjects.push_back(gameObject.get());
+		rootObjects.push_back(gameObject.get());
 	}
 
-	return activeObjects;
+	return rootObjects;
+}
+
+std::vector<GameObject*> Scene::GetActiveGameObjects()
+{
+	std::vector<GameObject*> allObjects;
+
+	// Get all objects from root objects
+	for (const auto& [name, gameObject] : _activeObjects)
+	{
+		GetAllGameObjectsInHierarchy(gameObject.get(), allObjects);
+	}
+
+	return allObjects;
+}
+
+void Scene::GetAllGameObjectsInHierarchy(GameObject* root, std::vector<GameObject*>& results)
+{
+	results.push_back(root);
+
+	// Add all children
+	for (GameObject* child : root->GetChildren())
+	{
+		GetAllGameObjectsInHierarchy(child, results);
+	}
 }
 
 void Scene::Awake()
@@ -164,31 +236,9 @@ void Scene::Render()
 		P = mainCamera->GetProjectionMatrix();
 	}
 
+	// Collect all renderable objects from hierarchy
 	for (auto& gameObject : _activeObjects) {
-		if (!gameObject.second->IsActive()) continue;
-
-		// Skip ground objects (already rendered)
-		if (gameObject.second->HasTag("Ground") || gameObject.second->HasTag("UI")) continue;
-
-		if (gameObject.second->GetComponent<SpriteRenderer>() != nullptr) {
-			const Transform& objTransform = gameObject.second->GetTransform();
-			glm::vec3 worldPos(
-				objTransform.GetPosition().x,
-				objTransform.GetPosition().y,
-				objTransform.GetPosition().z
-			);
-
-			// Project to clip space, then to NDC
-			glm::vec4 clip = P * V * glm::vec4(worldPos, 1.0f);
-			if (clip.w == 0.0f) continue;
-
-			float ndcY = clip.y / clip.w; // -1 bottom ... +1 top
-
-			// Optional: use depth as tie-breaker if needed
-			//float ndcZ = clip.z / clip.w;
-
-			renderableObjects.emplace_back(gameObject.second.get(), ndcY);
-		}
+		CollectRenderableObjects(gameObject.second.get(), renderableObjects, V, P);
 	}
 
 	std::sort(renderableObjects.begin(), renderableObjects.end(),
@@ -200,25 +250,66 @@ void Scene::Render()
 	for (auto& [gameObject, ndcY] : renderableObjects) {
 		gameObject->Render();
 	}
-	
-	// Sort by distance (farthest first)
-	std::sort(renderableObjects.begin(), renderableObjects.end(), 
-		[](const std::pair<GameObject*, float>& a, const std::pair<GameObject*, float>& b) {
-			return a.second > b.second;
-		});
-	
-	// Render other objects
-	for (auto& [gameObject, distance] : renderableObjects) {
-		gameObject->Render();
+
+	// Render text and UI elements
+	for (auto& it : _activeObjects) {
+		RenderUIElements(it.second.get());
+	}
+}
+
+void Scene::CollectRenderableObjects(GameObject* root, std::vector<std::pair<GameObject*, float>>& renderableObjects, 
+                                   const glm::mat4& V, const glm::mat4& P)
+{
+	if (!root->IsActive()) return;
+
+	// Skip ground objects (already rendered)
+	if (root->HasTag("Ground") || root->HasTag("UI")) return;
+
+	if (root->GetComponent<SpriteRenderer>() != nullptr) {
+		const Transform& objTransform = root->GetTransform();
+		glm::vec3 worldPos(
+			objTransform.GetWorldPosition().x,
+			objTransform.GetWorldPosition().y,
+			objTransform.GetWorldPosition().z
+		);
+
+		// Project to clip space, then to NDC
+		glm::vec4 clip = P * V * glm::vec4(worldPos, 1.0f);
+		if (clip.w == 0.0f) return;
+
+		float ndcY = clip.y / clip.w; // -1 bottom ... +1 top
+
+		renderableObjects.emplace_back(root, ndcY);
 	}
 
-	// Overlay text pass (render all TextRenderer components last, in screen space)
-	for (auto& it : _activeObjects) {
-		if (!it.second->IsActive()) continue;
-		if (auto* tr = it.second->GetComponent<TM::Graphics::TextRenderer>())
-		{
+	// Process children
+	for (GameObject* child : root->GetChildren())
+	{
+		CollectRenderableObjects(child, renderableObjects, V, P);
+	}
+}
+
+void Scene::RenderUIElements(GameObject* root)
+{
+	if (!root->IsActive()) return;
+
+	// Render text and image renderers
+	if (auto* tr = root->GetComponent<TM::Graphics::ImageRenderer>())
+	{
+		if (tr->IsActive())
 			tr->Render();
-		}
+	} 
+	
+	if (auto* tr = root->GetComponent<TM::Graphics::TextRenderer>())
+	{
+		if (tr->IsActive())
+			tr->Render();
+	}
+
+	// Process children
+	for (GameObject* child : root->GetChildren())
+	{
+		RenderUIElements(child);
 	}
 }
 

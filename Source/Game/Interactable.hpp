@@ -6,10 +6,10 @@
 #include <Graphics/SpriteRenderer.hpp>
 #include <Utils/Math.hpp>
 #include <Game/Billboard.hpp>
+#include <Game/Player/Inventory.hpp>
 
 using namespace TM::Core;
 using namespace TM::Graphics;
-using namespace TM::Game;
 
 namespace TM
 {
@@ -27,8 +27,8 @@ namespace TM
                 {
                     std::string logName = _gameObject.GetName() + " Log " + std::to_string(i);
                     GameObject* logObject = GameObject::Create(logName);
-                    logObject->_transform.SetPosition(_gameObject._transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
-                    logObject->_transform.SetScale(0.6f, 0.6f, 0.0f);
+                    logObject->transform.SetPosition(_gameObject.transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
+                    logObject->transform.SetScale(0.6f, 0.6f, 0.0f);
                     logObject->AddTag("Log");
                     Sprite* sprite = logObject->AddComponent<Sprite>();
                     sprite->SetTexture("Assets/Textures/log.png");
@@ -46,8 +46,8 @@ namespace TM
                 {
                     std::string logName = _gameObject.GetName() + " Rocks " + std::to_string(i);
                     GameObject* rocksObject = GameObject::Create(logName);
-                    rocksObject->_transform.SetPosition(_gameObject._transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
-                    rocksObject->_transform.SetScale(0.6f, 0.6f, 0.0f);
+                    rocksObject->transform.SetPosition(_gameObject.transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
+                    rocksObject->transform.SetScale(0.6f, 0.6f, 0.0f);
                     rocksObject->AddTag("Rocks");
                     Sprite* sprite = rocksObject->AddComponent<Sprite>();
                     sprite->SetTexture("Assets/Textures/rocks.png");
@@ -64,7 +64,7 @@ namespace TM
             void SetHovered(bool h) { _hovered = h; }
             bool IsHovered() const { return _hovered; }
 
-            void Interact() 
+            void Interact(GameObject* player) 
             {
                 if (_gameObject.HasTag("Tree"))
                 {
@@ -77,8 +77,22 @@ namespace TM
                 else if (_gameObject.HasTag("Berry Bush"))
                 {
 					_gameObject.GetComponent<Sprite>()->SetTexture("Assets/Textures/berry_bush_empty.png");
-                    //_gameObject.RemoveComponent<Interactable>();
+                    _gameObject.RemoveComponent<Interactable>();
+                    player->GetComponent<Inventory>()->AddItem({ "Berries", "Assets/Textures/Icons/berries_icon.png", 1 });
                 }
+                else if (_gameObject.HasTag("Plant"))
+                {
+                    player->GetComponent<Inventory>()->AddItem({ "Herbs", "Assets/Textures/Icons/herbs_icon.png", 1 });
+                }
+                else if (_gameObject.HasTag("Log"))
+                {
+                    player->GetComponent<Inventory>()->AddItem({ "Log", "Assets/Textures/Icons/log_icon.png", 1 });
+                }
+                else if (_gameObject.HasTag("Rocks"))
+                {
+                    player->GetComponent<Inventory>()->AddItem({ "Rocks", "Assets/Textures/Icons/rocks_icon.png", 1 });
+                }
+
 
                 if (!_gameObject.HasTag("Berry Bush"))
                 {
@@ -113,7 +127,7 @@ namespace TM
                     return "Collect Plant";
                 }
 
-                return "";
+                return "Interact with " + _gameObject.GetName();
             }
         };
     }

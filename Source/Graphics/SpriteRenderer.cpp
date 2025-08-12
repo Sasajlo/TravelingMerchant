@@ -23,7 +23,8 @@ void SpriteRenderer::Awake()
 
 	_shader.Use();
 	_shader.BindUniform1i("texture1", 0);
-	_shader.BindUniform4f("tintColor", 1.0f, 1.0f, 1.0f, 1.0f);
+	// Use the sprite's color instead of hardcoded white
+	_shader.BindUniform4f("tintColor", _sprite->GetColor().r, _sprite->GetColor().g, _sprite->GetColor().b, _sprite->GetColor().a);
 	_shader.BindUniform1f("whiten", 0.0f);
 }
 
@@ -35,7 +36,7 @@ void SpriteRenderer::Render()
 	}
 
 	// Ensure the shader and sprite are valid
-	glm::mat4 model = _gameObject._transform.GetModelMatrix();
+	glm::mat4 model = _gameObject.transform.GetModelMatrix();
 	glm::mat4 view = Camera::GetMain()->GetViewMatrix();
 	glm::mat4 projection = Camera::GetMain()->GetProjectionMatrix();
 	
@@ -46,6 +47,9 @@ void SpriteRenderer::Render()
 	_shader.BindUniformMatrix4fv("model", glm::value_ptr(model));
 	_shader.BindUniformMatrix4fv("view", glm::value_ptr(view));
 	_shader.BindUniformMatrix4fv("projection", glm::value_ptr(projection));
+
+	// Use the sprite's color for tinting
+	_shader.BindUniform4f("tintColor", _sprite->GetColor().r, _sprite->GetColor().g, _sprite->GetColor().b, _sprite->GetColor().a);
 
 	float whiten = 0.0f;
 	if (_gameObject.HasComponent<Interactable>()) {

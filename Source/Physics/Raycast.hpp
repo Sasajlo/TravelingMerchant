@@ -30,6 +30,7 @@ namespace TM
 				float distance = -1.0f;
 				Vector3 hitPoint;
 				bool hit = false;
+				bool ui = false;
 			};
 
 			// Convert screen coordinates to world ray
@@ -37,6 +38,7 @@ namespace TM
 
 			// Check if ray intersects with a sprite (simplified as a quad)
 			static HitResult RaycastSprite(const Ray& ray, GameObject* gameObject);
+			static HitResult RaycastUI(Vector3 mousePos, GameObject* gameObject);
 
 			// Perform raycast against all objects in scene
 			static HitResult RaycastAll(const Ray& ray);
