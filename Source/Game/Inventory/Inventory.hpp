@@ -37,6 +37,11 @@ namespace TM
         public:
             Slot(ImageRenderer* icon, TextRenderer* amountText) : _itemIcon(icon), _amountText(amountText) {}
 
+            bool IsEmpty()
+            {
+                return _item.amount == 0;
+            }
+
             void SetItem(Item item) 
             { 
                 _item = item; 
@@ -73,14 +78,14 @@ namespace TM
         public:
             Inventory(GameObject& gameObject) : Component(gameObject) {}
 
-            // References
-            GameObject* _inventory = nullptr;
+            // UI References
             GameObject* _equipment = nullptr;
             GameObject* _bag = nullptr;
 
             TextRenderer* _cursorText = nullptr;
 
-            bool _opened = false;
+            bool _bagOpened = false;
+            bool _equipmentOpened = false;
 
             // Slots
             int _inventorySize = 18;
@@ -88,7 +93,6 @@ namespace TM
 
             void Awake() override
             {
-                _inventory = GameObject::Find("Inventory");
                 _equipment = GameObject::Find("Equipment");
                 _bag = GameObject::Find("Bag");
 
@@ -97,8 +101,6 @@ namespace TM
 
             void Start() override
             {
-                _inventory->SetActive(_opened);
-
                 CreateSlots();
             }
 
@@ -112,21 +114,21 @@ namespace TM
                         int index = y * 6 + x + 1;
 
                         GameObject* slotObject = _bag->CreateChild("Slot " + index);
-                        slotObject->transform.SetPosition(x * SLOT_SEGMENT + SLOT_PADDING + 10, y * SLOT_SEGMENT + SLOT_PADDING - 155, 0.0f);
+                        slotObject->transform.SetPosition(x * SLOT_SEGMENT + SLOT_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + SLOT_PADDING - 155, 0.0f);
                         auto* slotImage = slotObject->AddComponent<ImageRenderer>();
                         slotImage->SetImage("Assets/Textures/bag_slot.png");
                         slotImage->SetSize(SLOT_SIZE, SLOT_SIZE);
                         slotImage->SetPivot(0.0f, 0.0f);
 
                         GameObject* iconObject = _bag->CreateChild("Slot Icon " + index);
-                        iconObject->transform.SetPosition(x * SLOT_SEGMENT + ICON_PADDING + 10, y * SLOT_SEGMENT + ICON_PADDING - 155, 0.0f);
+                        iconObject->transform.SetPosition(x * SLOT_SEGMENT + ICON_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + ICON_PADDING - 155, 0.0f);
                         auto* iconImage = iconObject->AddComponent<ImageRenderer>();
                         iconImage->SetSize(ICON_SIZE, ICON_SIZE);
                         iconImage->SetPivot(0.0f, 0.0f);
                         iconImage->SetActive(false);
 
                         GameObject* textObject = _bag->CreateChild("Item Count Text " + index);
-                        textObject->transform.SetPosition(x * SLOT_SEGMENT + TEXT_PADDING + 10, y * SLOT_SEGMENT + TEXT_PADDING - 155, 0.0f);
+                        textObject->transform.SetPosition(x * SLOT_SEGMENT + TEXT_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + TEXT_PADDING - 155, 0.0f);
                         auto* amountText = textObject->AddComponent<TextRenderer>();
                         amountText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 26.0f);
                         amountText->SetText("0");
@@ -141,22 +143,32 @@ namespace TM
 
             void Update(float deltaTime) override
             {
-                if (Input::IsKeyPressed(GLFW_KEY_B)) {
-                    _opened = !_opened;
-                    _inventory->SetActive(_opened);
+                if (Input::IsKeyPressed(GLFW_KEY_B))
+                {
+                    _bagOpened = !_bagOpened;
+                    _bag->SetActive(_bagOpened);
                 }
-                else if (Input::IsKeyPressed(GLFW_KEY_ESCAPE) && _opened) {
-                    _opened = false;
-                    _inventory->SetActive(false);
+                if (Input::IsKeyPressed(GLFW_KEY_H)) 
+                {
+                    _equipmentOpened = !_equipmentOpened;
+                    _equipment->SetActive(_equipmentOpened);
+                }
+                else if (Input::IsKeyPressed(GLFW_KEY_ESCAPE) && (_bagOpened || _equipmentOpened))
+                {
+                    _bagOpened = false;
+                    _equipmentOpened = false;
+                    _bag->SetActive(false);
+                    _equipment->SetActive(false);
                 }
 
-                if (_opened) 
+                if (_bagOpened) 
                 {
                     for (auto slot : _slots) {
-                        if (!slot.IsHovered()) continue;
+                        if (!slot.IsHovered() || slot.IsEmpty()) continue;
                         auto item = slot.GetItem();
                         _cursorText->SetText(item.name + " x" + std::to_string(item.amount));
                         _cursorText->SetActive(true);
+                        break;
                     }
                 }
             }
@@ -167,15 +179,17 @@ namespace TM
 
                 for (auto& slot : _slots)
                 {
-                    Item slotItem = slot.GetItem();
-                    if (slotItem.name == newItem.name)
+                    if (!slot.IsEmpty()) 
                     {
-                        slotItem.amount += newItem.amount;
-                        slot.SetItem(slotItem);
-                        return newItem.amount;
+                        Item slotItem = slot.GetItem();
+                        if (slotItem.name == newItem.name)
+                        {
+                            slotItem.amount += newItem.amount;
+                            slot.SetItem(slotItem);
+                            return newItem.amount;
+                        }
+                        continue;
                     }
-
-                    if (slot.GetItem().amount != 0) continue;
                     slot.SetItem(newItem);
                     slot.Show();
                     return newItem.amount;

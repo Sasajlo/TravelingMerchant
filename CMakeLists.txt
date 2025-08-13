@@ -84,8 +84,9 @@ set(HEADERS
     Source/Game/Debug.hpp
     Source/Game/Billboard.hpp
     Source/Game/Interactable.hpp
+    Source/Game/SpriteManager.hpp
 
-    Source/Game/Player/Inventory.hpp
+    Source/Game/Inventory/Inventory.hpp
 )
 
 # Create executable

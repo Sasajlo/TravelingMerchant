@@ -7,6 +7,7 @@
 #include <Graphics/TextRenderer.hpp>
 #include <Physics/Raycast.hpp>
 #include <Game/Interactable.hpp>
+#include <Game/SpriteManager.hpp>
 
 //using namespace TM::Core;
 using namespace TM::Graphics;
@@ -14,11 +15,6 @@ using namespace TM::Physics;
 
 namespace TM
 {
-    namespace Core
-    {
-        class GameObject; // Forward declaration
-    }
-
     namespace Game
     {
         class Player : public Component
@@ -37,8 +33,14 @@ namespace TM
 
 			Camera* _camera = nullptr;
             TextRenderer* _cursorText = nullptr;
+            SpriteManager* _spriteManager = nullptr;
 
             Interactable* _hoveredInteractable = nullptr;
+
+            // Movement data for other components to read
+            Vector3 _currentMovementDirection = Vector3::Zero;
+            Vector3 _worldMovementDirection = { 1.0f, 0.0f, 0.0f };
+            bool _wasMoving = false;
 
         public:
 			Player(GameObject& gameObject) : Component(gameObject) {}
@@ -47,11 +49,12 @@ namespace TM
             {
 				_camera = Camera::GetMain();
                 _cursorText = GameObject::Find("Cursor Text")->GetComponent<TextRenderer>();
+                _spriteManager = _gameObject.GetComponent<SpriteManager>();
             }
 
             void Start() override
             {
-
+                _spriteManager->SetIdleAnimation();
             }
 
             void Update(float deltaTime) override
@@ -95,7 +98,20 @@ namespace TM
                 if (direction.Length() > 0.0f) {
 					_goToTarget = false; // Stop moving to target if player is moving
                     direction = direction.Normalized();
+                    if (!_wasMoving)
+                    {
+                        _wasMoving = true;
+                        _spriteManager->SetRunAnimation();
+                    }
                 }
+                else if (_wasMoving && !_goToTarget)
+                {
+                    _wasMoving = false;
+                    _spriteManager->SetIdleAnimation();
+                }
+
+                // Store the input direction
+                _currentMovementDirection = direction;
 
                 float radians = glm::radians(-_cameraAngle);
                 float sinA = std::sin(radians);
@@ -105,6 +121,10 @@ namespace TM
                 rotatedDir.x = direction.x * cosA - direction.z * sinA;
                 rotatedDir.z = direction.x * sinA + direction.z * cosA;
                 rotatedDir.y = 0.0f; // No vertical movement
+
+                // Store the world-space direction
+                if (rotatedDir != Vector3::Zero)
+                    _worldMovementDirection = rotatedDir;
 
                 _gameObject.transform.position += rotatedDir * MOVEMENT_SPEED * deltaTime;
 
@@ -206,13 +226,24 @@ namespace TM
 						}
 
                         _goToTarget = false; // Stop moving when close enough
+                        _spriteManager->SetIdleAnimation();
+                        _wasMoving = false;
                     }
                     else
                     {
                         directionToTarget = directionToTarget.Normalized();
                         _gameObject.transform.position += directionToTarget * MOVEMENT_SPEED * deltaTime;
+                        _worldMovementDirection = directionToTarget;
+
+                        if (!_wasMoving)
+                        {
+                            _wasMoving = true;
+                            _spriteManager->SetRunAnimation();
+                        }
                     }
 				}
+
+                _spriteManager->UpdateDirection(_worldMovementDirection);
             }
 
             void CollectResource(Interactable* resource)
@@ -228,6 +259,10 @@ namespace TM
                 _targetPosition.y = 0;
                 _goToTarget = true;
             }
+
+            Vector3 GetMovementDirection() const { return _currentMovementDirection; }
+            Vector3 GetWorldMovementDirection() const { return _worldMovementDirection; }
+            float GetCameraAngle() const { return _cameraAngle; }
         };
     }
 }

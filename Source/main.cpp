@@ -24,13 +24,14 @@ int main()
 	// Create player object
 	GameObject* playerObject = GameObject::Create("Player");
 	playerObject->AddComponent<Player>();
-	playerObject->transform.SetScale(1.5f, 1.5f, 0.0f);
+	playerObject->transform.SetScale(2.0f, 2.0f, 0.0f);
 	playerObject->AddTag("Player");
 	Sprite* playerSprite = playerObject->AddComponent<Sprite>();
-	playerSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
-	playerSprite->SetTexture("Assets/Textures/player.png");
+	playerSprite->SetPivot(0.5f, 0.35f); // Set pivot to center
+	//playerSprite->SetTexture("Assets/Textures/player.png");
 	playerObject->AddComponent<SpriteRenderer>();
 	playerObject->AddComponent<Billboard>();
+	playerObject->AddComponent<SpriteManager>();
 	auto inventory = playerObject->AddComponent<Inventory>();
 
 	camera->LookAt(playerObject); // Set camera to follow player
@@ -117,28 +118,89 @@ int main()
 /****************************************************************** INVENTORY UI ******************************************************************/
 	
 	GameObject* inventoryObject = GameObject::Create("Inventory");
-	inventoryObject->SetActive(false);
 	inventoryObject->transform.SetPosition(Engine::GetWindowSize().width * 0.5f, Engine::GetWindowSize().height * 0.5f, 0.0f);
 
 	// Inventory Equipment
 	{
-		GameObject* object = inventoryObject->CreateChild("Equipment");
-		object->transform.SetPosition(-200.0f, 0.0f, 0.0f);
-		auto* image = object->AddComponent<ImageRenderer>();
+		GameObject* equipmentObject = inventoryObject->CreateChild("Equipment");
+		equipmentObject->transform.SetPosition(-Engine::GetWindowSize().width * 0.5f + 350.0f, Engine::GetWindowSize().height * 0.5f - 400.0f, 0.0f);
+		auto* image = equipmentObject->AddComponent<ImageRenderer>();
 		image->SetImage("Assets/Textures/inventory_equipment.png");
 		image->SetSize(600, 600);
-		image->SetPivot(1.0f, 0.5f);
+		image->SetPivot(0.5f, 0.5f);
+		equipmentObject->SetActive(false);
+
+		// Create title
+		{
+			GameObject* titleObject = equipmentObject->CreateChild("Equipment Title");
+			titleObject->transform.SetPosition(0.0f, -300.0f, 0.0f);
+			auto* titleBackground = titleObject->AddComponent<ImageRenderer>();
+			titleBackground->SetImage("Assets/Textures/title_frame.png");
+			titleBackground->SetSize(320, 80);
+			titleBackground->SetPivot(0.5f, 0.5f);
+			auto* titleText = titleObject->AddComponent<TextRenderer>();
+			titleText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+			titleText->SetText("Equipment");
+			titleText->SetPivot(0.5f, 0.5f);
+		}
 	}
 
 	// Inventory Bag
 	{
 		GameObject* bagObject = inventoryObject->CreateChild("Bag");
-		bagObject->transform.SetPosition(200.0f, 0.0f, 0.0f);
+		bagObject->transform.SetPosition(Engine::GetWindowSize().width * 0.5f - 350.0f, Engine::GetWindowSize().height * 0.5f - 250.0f, 0.0f);
 		auto* image= bagObject->AddComponent<ImageRenderer>();
 		image->SetImage("Assets/Textures/inventory_container.png");
 		image->SetSize(600, 300);
-		image->SetPivot(0.0f, 0.5f);
+		image->SetPivot(0.5f, 0.5f);
+		bagObject->SetActive(false);
+
+		// Create title
+		{
+			GameObject* titleObject = bagObject->CreateChild("Bag Title");
+			titleObject->transform.SetPosition(0.0f, -150.0f, 0.0f);
+			auto* titleBackground = titleObject->AddComponent<ImageRenderer>();
+			titleBackground->SetImage("Assets/Textures/title_frame.png");
+			titleBackground->SetSize(280, 70);
+			titleBackground->SetPivot(0.5f, 0.5f);
+			auto* titleText = titleObject->AddComponent<TextRenderer>();
+			titleText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+			titleText->SetText("Bag");
+			titleText->SetPivot(0.5f, 0.5f);
+		}
 	}
+
+/****************************************************************** BUTTONS ******************************************************************/
+
+// Bag Button
+{
+	GameObject* inventoryButtonObject = GameObject::Create("Bag Button");
+	inventoryButtonObject->transform.SetPosition(Engine::GetWindowSize().width - 20.0f, Engine::GetWindowSize().height - 10.f, 0.0f);
+	auto* inventoryButtonImage = inventoryButtonObject->AddComponent<ImageRenderer>();
+	inventoryButtonImage->SetImage("Assets/Textures/Buttons/bag_button.png");
+	inventoryButtonImage->SetSize(75, 75);
+	inventoryButtonImage->SetPivot(1.0f, 1.0f);
+
+	auto* buttonText = inventoryButtonObject->AddComponent<TextRenderer>();
+	buttonText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
+	buttonText->SetText("B");
+	buttonText->SetPivot(1.0f, 1.0f);
+}
+
+// Equipment Button
+{
+	GameObject* inventoryButtonObject = GameObject::Create("Equipment Button");
+	inventoryButtonObject->transform.SetPosition(Engine::GetWindowSize().width - 100.0f, Engine::GetWindowSize().height - 10.f, 0.0f);
+	auto* inventoryButtonImage = inventoryButtonObject->AddComponent<ImageRenderer>();
+	inventoryButtonImage->SetImage("Assets/Textures/Buttons/equipment_button.png");
+	inventoryButtonImage->SetSize(75, 75);
+	inventoryButtonImage->SetPivot(1.0f, 1.0f);
+
+	auto* buttonText = inventoryButtonObject->AddComponent<TextRenderer>();
+	buttonText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32);
+	buttonText->SetText("H");
+	buttonText->SetPivot(1.0f, 1.0f);
+}
 
 /****************************************************************** STATS UI ******************************************************************/
 
@@ -147,7 +209,7 @@ int main()
 		GameObject* object = GameObject::Create("Level Text");
 		object->transform.SetPosition(20.0f, 20.0f, 0.0f);
 		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
 		text->SetPivot(0.0f, 0.0f);
 		text->SetText("Level: 1   XP: 0/100");
 	}
@@ -155,9 +217,9 @@ int main()
 	// Health bar
 	{
 		GameObject* object = GameObject::Create("Health Text");
-		object->transform.SetPosition(20.0f, 70.0f, 0.0f);
+		object->transform.SetPosition(20.0f, 50.0f, 0.0f);
 		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
 		text->SetPivot(0.0f, 0.0f);
 		text->SetText("Health: 100/100");
 	}
@@ -165,9 +227,9 @@ int main()
 	// Mana bar
 	{
 		GameObject* object = GameObject::Create("Mana Text");
-		object->transform.SetPosition(20.0f, 120.0f, 0.0f);
+		object->transform.SetPosition(20.0f, 80, 0.0f);
 		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
 		text->SetPivot(0.0f, 0.0f);
 		text->SetText("Mana: 100/100");
 	}
@@ -175,9 +237,9 @@ int main()
 	// Hunger bar
 	{
 		GameObject* object = GameObject::Create("Hunger Text");
-		object->transform.SetPosition(20.0f, 170.0f, 0.0f);
+		object->transform.SetPosition(20.0f, 110, 0.0f);
 		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
 		text->SetPivot(0.0f, 0.0f);
 		text->SetText("Hunger: 100/100");
 	}

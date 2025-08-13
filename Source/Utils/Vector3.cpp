@@ -1,5 +1,7 @@
 #include <Utils/Vector3.hpp>
 
+#include <algorithm>
+
 using namespace TM::Utils;
 
 // Global constants
@@ -18,6 +20,34 @@ Vector3 Vector3::Lerp(Vector3 target, float value)
 		std::lerp(x, target.x, value),
 		std::lerp(y, target.y, value),
 		std::lerp(z, target.z, value)
+	);
+}
+
+Vector3 Vector3::Clamp(float min, float max) const
+{
+	return Vector3(
+		std::clamp(x, min, max),
+		std::clamp(y, min, max),
+		std::clamp(z, min, max)
+	);
+}
+
+Vector3 Vector3::Clamp(const Vector3& min, const Vector3& max) const
+{
+	return Vector3(
+		std::clamp(x, min.x, max.x),
+		std::clamp(y, min.y, max.y),
+		std::clamp(z, min.z, max.z)
+	);
+}
+
+
+Vector3 Vector3::Cross(const Vector3& other) const
+{
+	return Vector3(
+		y * other.z - z * other.y,
+		z * other.x - x * other.z,
+		x * other.y - y * other.x
 	);
 }
 

@@ -2,7 +2,7 @@
 
 // Game module headers
 #include <Game/Player.hpp>
-#include <Game/Player/Inventory.hpp>
+#include <Game/Inventory/Inventory.hpp>
 
 #include <Game/Interactable.hpp>
 #include <Game/Billboard.hpp>

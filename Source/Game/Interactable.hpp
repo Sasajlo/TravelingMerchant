@@ -6,7 +6,7 @@
 #include <Graphics/SpriteRenderer.hpp>
 #include <Utils/Math.hpp>
 #include <Game/Billboard.hpp>
-#include <Game/Player/Inventory.hpp>
+#include <Game/Inventory/Inventory.hpp>
 
 using namespace TM::Core;
 using namespace TM::Graphics;

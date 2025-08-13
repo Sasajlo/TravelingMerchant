@@ -23,6 +23,8 @@ namespace TM
 			Vector3 operator*(float scalar) const { return Vector3(x * scalar, y * scalar, z * scalar); }
 			Vector3 operator/(float scalar) const { return Vector3(x / scalar, y / scalar, z / scalar); }
 
+			float operator*(const Vector3& other) const { return x * other.x + y * other.y + z * other.z; }
+
 			Vector3& operator+=(const Vector3& other) { x += other.x; y += other.y; z += other.z; return *this; }
 			Vector3& operator-=(const Vector3& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
 			Vector3& operator*=(float scalar) { x *= scalar; y *= scalar; z *= scalar; return *this; }
@@ -37,6 +39,12 @@ namespace TM
 			Vector3 Normalized() const { float mag = Length(); return mag > 0 ? *this / mag : Vector3(); }
 			Vector3 Lerp(Vector3 target, float value);
 			float Distance(const Vector3& other) const { return (other - *this).Length(); }
+
+			// Clamp vector components between min and max values
+			Vector3 Clamp(float min, float max) const;
+			Vector3 Clamp(const Vector3& min, const Vector3& max) const;
+
+			Vector3 Cross(const Vector3& other) const;
 
 			Vector3 RotateAroundY(float angle);
 
