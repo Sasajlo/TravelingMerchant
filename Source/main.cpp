@@ -63,7 +63,7 @@ int main()
 		gameObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
 		gameObject->transform.SetScale(3.0f, 3.0f, 0.0f);
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
-		sprite->SetPivot(0.5f, 0.01f); // Set pivot to center
+		sprite->SetPivot(0.5f, 0.08f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/tree.png");
 		gameObject->AddComponent<SpriteRenderer>();
 		gameObject->AddComponent<Billboard>();
@@ -76,9 +76,9 @@ int main()
 		GameObject* gameObject = GameObject::Create(name);
 		gameObject->AddTag("Stone");
 		gameObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		gameObject->transform.SetScale(2.0f, 2.0f, 0.0f);
+		gameObject->transform.SetScale(1.5f, 1.5f, 1.5f);
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
-		sprite->SetPivot(0.5f, 0.1f); // Set pivot to center
+		sprite->SetPivot(0.5f, 0.15f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/stone.png");
 		gameObject->AddComponent<SpriteRenderer>();
 		gameObject->AddComponent<Billboard>();
@@ -108,7 +108,7 @@ int main()
 		gameObject->transform.SetScale(0.6f, 0.6f, 0.0f);
 		gameObject->AddTag("Plant");
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
-		sprite->SetPivot(0.5f, 0.0f); // Set pivot to center
+		sprite->SetPivot(0.5f, 0.35f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/plant.png");
 		gameObject->AddComponent<SpriteRenderer>();
 		gameObject->AddComponent<Billboard>();

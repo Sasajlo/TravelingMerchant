@@ -32,7 +32,7 @@ namespace TM
                     logObject->AddTag("Log");
                     Sprite* sprite = logObject->AddComponent<Sprite>();
                     sprite->SetTexture("Assets/Textures/log.png");
-                    sprite->SetPivot(0.5f, 0.0f); // Set pivot to center
+                    sprite->SetPivot(0.5f, 0.1f); // Set pivot to center
                     logObject->AddComponent<SpriteRenderer>();
                     logObject->AddComponent<Billboard>();
                     logObject->AddComponent<Interactable>();
@@ -47,11 +47,11 @@ namespace TM
                     std::string logName = _gameObject.GetName() + " Rocks " + std::to_string(i);
                     GameObject* rocksObject = GameObject::Create(logName);
                     rocksObject->transform.SetPosition(_gameObject.transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
-                    rocksObject->transform.SetScale(0.6f, 0.6f, 0.0f);
+                    rocksObject->transform.SetScale(0.45f, 0.45f, 0.0f);
                     rocksObject->AddTag("Rocks");
                     Sprite* sprite = rocksObject->AddComponent<Sprite>();
                     sprite->SetTexture("Assets/Textures/rocks.png");
-                    sprite->SetPivot(0.5f, 0.0f); // Set pivot to center
+                    sprite->SetPivot(0.5f, 0.3f); // Set pivot to center
                     rocksObject->AddComponent<SpriteRenderer>();
                     rocksObject->AddComponent<Billboard>();
                     rocksObject->AddComponent<Interactable>();
