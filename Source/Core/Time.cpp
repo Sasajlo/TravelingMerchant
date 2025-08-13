@@ -5,6 +5,8 @@
 
 using namespace TM::Core;
 
+float Time::totalTime = 0.0f;
+
 Time::Time()
 {
 	_lastFrameTime = std::chrono::high_resolution_clock::now();
@@ -19,6 +21,7 @@ void Time::Update()
 
 	++_frameCount;
 	_timePassed += _deltaTime;
+	totalTime += _deltaTime;
 
 	if (_timePassed >= 1.0f) {
 		_fps = std::floor(_frameCount / _timePassed);

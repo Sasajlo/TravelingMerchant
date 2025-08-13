@@ -23,51 +23,63 @@ void SpriteRenderer::Awake()
 
 	_shader.Use();
 	_shader.BindUniform1i("texture1", 0);
-	// Use the sprite's color instead of hardcoded white
 	_shader.BindUniform4f("tintColor", _sprite->GetColor().r, _sprite->GetColor().g, _sprite->GetColor().b, _sprite->GetColor().a);
 	_shader.BindUniform1f("whiten", 0.0f);
+
+	// Initialize swaying uniforms
+	_shader.BindUniform1f("time", 0.0f);
+	_shader.BindUniform1i("enableSwaying", _enableSwaying);
+	_shader.BindUniform1f("swayAmount", _swayAmount);
+	_shader.BindUniform1f("swaySpeed", _swaySpeed);
 }
 
 void SpriteRenderer::Render()
 {
-	_sprite = _gameObject.GetComponent<Sprite>();
-	if (_sprite == nullptr) {
-		return;
-	}
+    _sprite = _gameObject.GetComponent<Sprite>();
+    if (_sprite == nullptr) {
+        return;
+    }
 
-	// Ensure the shader and sprite are valid
-	glm::mat4 model = _gameObject.transform.GetModelMatrix();
-	glm::mat4 view = Camera::GetMain()->GetViewMatrix();
-	glm::mat4 projection = Camera::GetMain()->GetProjectionMatrix();
-	
-	// Use the shader program
-	_shader.Use();
+    // Get current time for swaying animation
+    float currentTime = Time::totalTime;
 
-	// Bind uniforms
-	_shader.BindUniformMatrix4fv("model", glm::value_ptr(model));
-	_shader.BindUniformMatrix4fv("view", glm::value_ptr(view));
-	_shader.BindUniformMatrix4fv("projection", glm::value_ptr(projection));
+    glm::mat4 model = _gameObject.transform.GetModelMatrix();
+    glm::mat4 view = Camera::GetMain()->GetViewMatrix();
+    glm::mat4 projection = Camera::GetMain()->GetProjectionMatrix();
 
-	// Use the sprite's color for tinting
-	_shader.BindUniform4f("tintColor", _sprite->GetColor().r, _sprite->GetColor().g, _sprite->GetColor().b, _sprite->GetColor().a);
+    _shader.Use();
 
-	float whiten = 0.0f;
-	if (_gameObject.HasComponent<Interactable>()) {
-		auto* interactable = _gameObject.GetComponent<Interactable>();
-		if (interactable && interactable->IsHovered()) {
-			whiten = 0.2f;
-		}
-	}
-	_shader.BindUniform1f("whiten", whiten);
+    // Bind uniforms
+    _shader.BindUniformMatrix4fv("model", glm::value_ptr(model));
+    _shader.BindUniformMatrix4fv("view", glm::value_ptr(view));
+    _shader.BindUniformMatrix4fv("projection", glm::value_ptr(projection));
 
-	// Bind the texture
-	_sprite->Bind();
+    // Bind swaying uniforms
+    _shader.BindUniform1f("time", currentTime);
+    _shader.BindUniform1i("enableSwaying", _enableSwaying);
+    _shader.BindUniform1f("swayAmount", _swayAmount);
+    _shader.BindUniform1f("swaySpeed", _swaySpeed);
 
-	// Draw the sprite
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // Use the sprite's color for tinting
+    _shader.BindUniform4f("tintColor", _sprite->GetColor().r, _sprite->GetColor().g, _sprite->GetColor().b, _sprite->GetColor().a);
 
-	// Unbind VAO to prevent state pollution
-	glBindVertexArray(0);
+    float whiten = 0.0f;
+    if (_gameObject.HasComponent<Interactable>()) {
+        auto* interactable = _gameObject.GetComponent<Interactable>();
+        if (interactable && interactable->IsHovered()) {
+            whiten = 0.2f;
+        }
+    }
+    _shader.BindUniform1f("whiten", whiten);
+
+    // Bind the texture
+    _sprite->Bind();
+
+    // Draw the sprite
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    // Unbind VAO to prevent state pollution
+    glBindVertexArray(0);
 }
 
 void SpriteRenderer::Destroy()

@@ -58,16 +58,35 @@ int main()
 	// Spawn tree objects
 	for (int i = 0; i < 20; i++) {
 		std::string name = "Tree " + std::to_string(i);
-		GameObject* gameObject = GameObject::Create(name);
-		gameObject->AddTag("Tree");
-		gameObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		gameObject->transform.SetScale(3.0f, 3.0f, 0.0f);
-		Sprite* sprite = gameObject->AddComponent<Sprite>();
-		sprite->SetPivot(0.5f, 0.08f); // Set pivot to center
-		sprite->SetTexture("Assets/Textures/tree.png");
-		gameObject->AddComponent<SpriteRenderer>();
-		gameObject->AddComponent<Billboard>();
-		gameObject->AddComponent<Interactable>();
+		GameObject* treeObject = GameObject::Create(name);
+		treeObject->AddTag("Tree");
+		treeObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
+		treeObject->transform.SetScale(3.0f, 3.0f, 0.0f);
+		Sprite* baseSprite = treeObject->AddComponent<Sprite>();
+		baseSprite->SetPivot(0.5f, 0.08f); // Set pivot to center
+		baseSprite->SetTexture("Assets/Textures/tree.png");
+		auto baseRenderer = treeObject->AddComponent<SpriteRenderer>();
+		baseRenderer->EnableSwaying(false);
+		baseRenderer->SetSwayAmount(0.1f);  // How much it sways
+		baseRenderer->SetSwaySpeed(2.2f);    // Speed of swaying
+		treeObject->AddComponent<Billboard>();
+		treeObject->AddComponent<Interactable>();
+
+		// Create tree top
+		{
+			GameObject* treeTopObject = treeObject->CreateChild(name + " Top");
+			treeTopObject->AddTag("Tree");
+			treeTopObject->transform.SetPosition(0.0f, -0.085f, 0.0f);
+			Sprite* treeTopSprite = treeTopObject->AddComponent<Sprite>();
+			treeTopSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
+			treeTopSprite->SetTexture("Assets/Textures/tree_top.png");
+			auto treeTopRenderer = treeTopObject->AddComponent<SpriteRenderer>();
+			treeTopRenderer->EnableSwaying(true);
+			treeTopRenderer->SetSwayAmount(0.05f);  // How much it sways
+			treeTopRenderer->SetSwaySpeed(1.6f);    // Speed of swaying
+			//gameObject->AddComponent<Billboard>();
+			treeTopObject->AddComponent<Interactable>();
+		}
 	}
 
 	// Spawn stone objects
@@ -95,7 +114,11 @@ int main()
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
 		sprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/berry_bush.png");
-		gameObject->AddComponent<SpriteRenderer>();
+		auto renderer = gameObject->AddComponent<SpriteRenderer>();
+		// Enable swaying with custom parameters
+		renderer->EnableSwaying(true);
+		renderer->SetSwayAmount(0.05f);  // How much it sways
+		renderer->SetSwaySpeed(2.2f);    // Speed of swaying
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
 	}
@@ -110,7 +133,11 @@ int main()
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
 		sprite->SetPivot(0.5f, 0.35f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/plant.png");
-		gameObject->AddComponent<SpriteRenderer>();
+		auto renderer = gameObject->AddComponent<SpriteRenderer>();
+		// Enable swaying with custom parameters
+		renderer->EnableSwaying(true);
+		renderer->SetSwayAmount(0.05f);  // How much it sways
+		renderer->SetSwaySpeed(2.2f);    // Speed of swaying
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
 	}
