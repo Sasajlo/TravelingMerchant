@@ -251,10 +251,12 @@ void Scene::Render()
 		gameObject->Render();
 	}
 
+	glDisable(GL_CULL_FACE);
 	// Render text and UI elements
 	for (auto& it : _activeObjects) {
 		RenderUIElements(it.second.get());
 	}
+	glEnable(GL_CULL_FACE);
 }
 
 void Scene::CollectRenderableObjects(GameObject* root, std::vector<std::pair<GameObject*, float>>& renderableObjects, 

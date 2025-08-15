@@ -19,7 +19,7 @@ void main()
 
     if (enableSwaying) {
         // Use texture coordinate Y as a normalized height factor
-        float heightFactor = 1.0 - (inTexCoord.y + 0.3);
+        float heightFactor = 1.0 - inTexCoord.y;
 
         // Horizontal sway increases with height
         float sway = sin(time * swaySpeed) * swayAmount * heightFactor;

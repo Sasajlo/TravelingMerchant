@@ -46,7 +46,7 @@ int main()
 			std::string name = "Ground " + std::to_string(index);
 			GameObject* gameObject = GameObject::Create(name);
 			gameObject->transform.SetScale(10.0f, 10.0f, 10.0f);
-			gameObject->transform.SetRotation(90.0f, 0.0f, 0.0f);
+			gameObject->transform.SetRotation(-90.0f, 0.0f, 0.0f);
 			gameObject->transform.SetPosition(x * 10.0f, 0.0f, y * 10.0f);
 			Sprite* sprite = gameObject->AddComponent<Sprite>();
 			sprite->SetTexture("Assets/Textures/ground.png");
@@ -56,19 +56,19 @@ int main()
 	}
 
 	// Spawn tree objects
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 30; i++) {
 		std::string name = "Tree " + std::to_string(i);
 		GameObject* treeObject = GameObject::Create(name);
 		treeObject->AddTag("Tree");
 		treeObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		treeObject->transform.SetScale(3.0f, 3.0f, 0.0f);
+		treeObject->transform.SetScale(3.5f, 3.5f, 0.0f);
 		Sprite* baseSprite = treeObject->AddComponent<Sprite>();
 		baseSprite->SetPivot(0.5f, 0.08f); // Set pivot to center
 		baseSprite->SetTexture("Assets/Textures/tree.png");
 		auto baseRenderer = treeObject->AddComponent<SpriteRenderer>();
-		baseRenderer->EnableSwaying(false);
-		baseRenderer->SetSwayAmount(0.1f);  // How much it sways
-		baseRenderer->SetSwaySpeed(2.2f);    // Speed of swaying
+		baseRenderer->EnableSwaying(true);
+		baseRenderer->SetSwayAmount(0.005f);  // How much it sways
+		baseRenderer->SetSwaySpeed(1.6f);    // Speed of swaying
 		treeObject->AddComponent<Billboard>();
 		treeObject->AddComponent<Interactable>();
 
@@ -76,13 +76,13 @@ int main()
 		{
 			GameObject* treeTopObject = treeObject->CreateChild(name + " Top");
 			treeTopObject->AddTag("Tree");
-			treeTopObject->transform.SetPosition(0.0f, -0.085f, 0.0f);
+			treeTopObject->transform.SetPosition(0.0f, 0.225f, 0.0f);
 			Sprite* treeTopSprite = treeTopObject->AddComponent<Sprite>();
 			treeTopSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 			treeTopSprite->SetTexture("Assets/Textures/tree_top.png");
 			auto treeTopRenderer = treeTopObject->AddComponent<SpriteRenderer>();
 			treeTopRenderer->EnableSwaying(true);
-			treeTopRenderer->SetSwayAmount(0.05f);  // How much it sways
+			treeTopRenderer->SetSwayAmount(0.03f);  // How much it sways
 			treeTopRenderer->SetSwaySpeed(1.6f);    // Speed of swaying
 			//gameObject->AddComponent<Billboard>();
 			treeTopObject->AddComponent<Interactable>();
@@ -90,12 +90,12 @@ int main()
 	}
 
 	// Spawn stone objects
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 20; i++) {
 		std::string name = "Stone " + std::to_string(i);
 		GameObject* gameObject = GameObject::Create(name);
 		gameObject->AddTag("Stone");
 		gameObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		gameObject->transform.SetScale(1.5f, 1.5f, 1.5f);
+		gameObject->transform.SetScale(1.3f, 1.3f, 1.3f);
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
 		sprite->SetPivot(0.5f, 0.15f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/stone.png");
@@ -105,26 +105,26 @@ int main()
 	}
 
 	// Spawn berry bush objects
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 20; i++) {
 		std::string name = "Berry Bush " + std::to_string(i);
 		GameObject* gameObject = GameObject::Create(name);
 		gameObject->AddTag("Berry Bush");
 		gameObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		gameObject->transform.SetScale(1.5f, 1.5f, 0.0f);
+		gameObject->transform.SetScale(1.0f, 1.0f, 0.0f);
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
-		sprite->SetPivot(0.5f, 0.0f); // Set pivot to center
+		sprite->SetPivot(0.5f, 0.1f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/berry_bush.png");
 		auto renderer = gameObject->AddComponent<SpriteRenderer>();
 		// Enable swaying with custom parameters
 		renderer->EnableSwaying(true);
 		renderer->SetSwayAmount(0.05f);  // How much it sways
-		renderer->SetSwaySpeed(2.2f);    // Speed of swaying
+		renderer->SetSwaySpeed(1.6f);    // Speed of swaying
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
 	}
 
 	// Spawn plant objects
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 20; i++) {
 		std::string name = "Plant " + std::to_string(i);
 		GameObject* gameObject = GameObject::Create(name);
 		gameObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
@@ -136,8 +136,8 @@ int main()
 		auto renderer = gameObject->AddComponent<SpriteRenderer>();
 		// Enable swaying with custom parameters
 		renderer->EnableSwaying(true);
-		renderer->SetSwayAmount(0.05f);  // How much it sways
-		renderer->SetSwaySpeed(2.2f);    // Speed of swaying
+		renderer->SetSwayAmount(0.06f);  // How much it sways
+		renderer->SetSwaySpeed(1.6f);    // Speed of swaying
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
 	}

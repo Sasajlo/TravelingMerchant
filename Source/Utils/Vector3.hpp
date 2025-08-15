@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <Graphics/Core.hpp>
+#include <glm/glm.hpp>
 
 namespace TM
 {

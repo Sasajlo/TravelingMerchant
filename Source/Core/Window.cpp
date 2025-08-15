@@ -74,6 +74,10 @@ bool Window::Initialize(const std::string& title, int width, int height, bool fu
 	// Enable blending for transparency
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Enable backface culling for 2D sprites
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);  // Cull back faces
 	
 	// Viewport
 	glViewport(0, 0, GetWidth(), GetHeight());
