@@ -7,6 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 using namespace TM::Utils;
 
 namespace TM
@@ -16,9 +19,9 @@ namespace TM
 		class Transform : public Component
 		{
 		public:
-			Vector3 position;
-			Vector3 rotation; // In degrees: pitch, yaw, roll
-			Vector3 scale;
+			Vector3 position = { 0.0f, 0.0f, 0.0f };
+			Vector3 rotation = { 0.0f, 0.0f, 0.0f }; // In degrees: pitch, yaw, roll
+			Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
 			Transform(GameObject& gameObject) : Component(gameObject), position(Vector3::Zero), rotation(Vector3::Zero), scale(Vector3::One) {}
 
@@ -49,21 +52,23 @@ namespace TM
 			Vector3 GetWorldPosition() const;
 			Vector3 GetWorldRotation() const;
 			Vector3 GetWorldScale() const;
-			glm::mat4 GetWorldMatrix() const;
+			glm::mat4 GetWorldMatrix();
 
 			// Local transform matrix (relative to parent)
-			glm::mat4 GetLocalMatrix() const
+			glm::mat4 GetLocalMatrix()
 			{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::translate(model, glm::vec3(position.x, position.y, position.z));
-				model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Roll
-				model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Yaw
-				model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)); // Pitch
 				model = glm::scale(model, glm::vec3(scale.x, scale.y, scale.z));
-				return model;
+
+				glm::vec3 modelRotation = { rotation.x, rotation.y, rotation.z };
+				glm::quat q = glm::quat(glm::radians(modelRotation)); // from Euler
+				glm::mat4 rotationMatrix = glm::toMat4(q);
+
+				return model * rotationMatrix;
 			}
 
-			glm::mat4 GetModelMatrix() const
+			glm::mat4 GetModelMatrix()
 			{
 				return GetWorldMatrix();
 			}

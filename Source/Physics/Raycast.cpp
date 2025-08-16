@@ -6,10 +6,13 @@
 #include <Graphics/TextRenderer.hpp>
 #include <algorithm>
 
+#include <Game/Interactable.hpp>
+
 using namespace TM::Utils;
 using namespace TM::Core;
 using namespace TM::Graphics;
 using namespace TM::Physics;
+using namespace TM::Game;
 
 Raycast::Ray Raycast::ScreenPointToRay(float screenX, float screenY, int screenWidth, int screenHeight)
 {
@@ -182,7 +185,7 @@ Raycast::HitResult Raycast::RaycastAll(const Ray& ray)
 		if (!gameObject->IsActive() || gameObject->HasTag("UI")) continue;
 
 		// Skip objects without SpriteRenderer
-		if (!gameObject->GetComponent<SpriteRenderer>() || gameObject->HasTag("Player")) continue;
+		if (!gameObject->GetComponent<Interactable>() || gameObject->HasTag("Player")) continue;
 
 		HitResult hit = RaycastSprite(ray, gameObject);
 		if (hit.hit && hit.distance < closestHit.distance)

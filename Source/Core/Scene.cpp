@@ -5,6 +5,7 @@
 #include <Graphics/Camera.hpp>
 #include <Graphics/TextRenderer.hpp> 
 #include <Graphics/ImageRenderer.hpp>
+#include <algorithm>
 
 using namespace TM::Core;
 using namespace TM::Graphics;
@@ -53,14 +54,14 @@ GameObject* Scene::FindGameObject(const std::string& name)
 	{
 		return asleepIt->second.get();
 	}
-	
+
 	// Search in awakened objects
 	auto awakenedIt = _awakenObjects.find(name);
 	if (awakenedIt != _awakenObjects.end())
 	{
 		return awakenedIt->second.get();
 	}
-	
+
 	// Search in active objects
 	auto activeIt = _activeObjects.find(name);
 	if (activeIt != _activeObjects.end())
@@ -69,7 +70,7 @@ GameObject* Scene::FindGameObject(const std::string& name)
 	}
 
 	for (auto& gameObject : _asleepObjects)
-	{ 
+	{
 		auto result = FindGameObjectInHierarchy(name, gameObject.second.get());
 		if (result) return result;
 	}
@@ -111,13 +112,13 @@ GameObject* Scene::FindGameObjectInHierarchy(const std::string& name, GameObject
 std::vector<GameObject*> Scene::FindGameObjectsByTag(const std::string& tag)
 {
 	std::vector<GameObject*> foundObjects;
-	
+
 	// Search in active objects (root objects only)
 	for (auto& gameObject : _activeObjects)
 	{
 		FindGameObjectsByTagInHierarchy(tag, gameObject.second.get(), foundObjects);
 	}
-	
+
 	return foundObjects;
 }
 
@@ -172,6 +173,184 @@ void Scene::GetAllGameObjectsInHierarchy(GameObject* root, std::vector<GameObjec
 	}
 }
 
+void Scene::SubscribeSpriteRenderer(SpriteRenderer* renderer, unsigned int textureId)
+{
+	if (!renderer) return;
+
+	// Check if this is a ground sprite and add it to ground collection
+	if (renderer->GetGameObject().HasTag("Ground"))
+	{
+		AddGroundSprite(renderer);
+		return; // Don't add to texture groups
+	}
+
+	_spriteRenderersByTexture[textureId].push_back(renderer);
+}
+
+void Scene::UnsubscribeSpriteRenderer(SpriteRenderer* renderer, unsigned int textureId)
+{
+	if (!renderer) return;
+
+	// Check if this is a ground sprite and remove it from ground collection
+	if (renderer->GetGameObject().HasTag("Ground"))
+	{
+		RemoveGroundSprite(renderer);
+		return; // Don't remove from texture groups
+	}
+
+	auto textureGroupIt = _spriteRenderersByTexture.find(textureId);
+	if (textureGroupIt != _spriteRenderersByTexture.end())
+	{
+		auto& renderers = textureGroupIt->second;
+		renderers.erase(
+			std::remove(renderers.begin(), renderers.end(), renderer),
+			renderers.end()
+		);
+
+		// Remove the texture group if it's empty
+		if (renderers.empty())
+		{
+			_spriteRenderersByTexture.erase(textureGroupIt);
+		}
+	}
+}
+
+void Scene::UpdateSpriteRendererTexture(SpriteRenderer* renderer, unsigned int oldTextureId, unsigned int newTextureId)
+{
+	if (!renderer) return;
+
+	// Ground sprites don't need texture updates since they're rendered separately
+	if (renderer->GetGameObject().HasTag("Ground")) return;
+
+	// Unsubscribe from old texture group
+	UnsubscribeSpriteRenderer(renderer, oldTextureId);
+
+	// Subscribe to new texture group
+	SubscribeSpriteRenderer(renderer, newTextureId);
+}
+
+void Scene::AddGroundSprite(SpriteRenderer* renderer)
+{
+	if (!renderer) return;
+
+	// Check if already in the collection
+	auto it = std::find(_groundSprites.begin(), _groundSprites.end(), renderer);
+	if (it == _groundSprites.end())
+	{
+		_groundSprites.push_back(renderer);
+	}
+}
+
+void Scene::RemoveGroundSprite(SpriteRenderer* renderer)
+{
+	if (!renderer) return;
+
+	auto it = std::find(_groundSprites.begin(), _groundSprites.end(), renderer);
+	if (it != _groundSprites.end())
+	{
+		_groundSprites.erase(it);
+	}
+}
+
+void Scene::SubscribeImageRenderer(ImageRenderer* renderer)
+{
+	if (!renderer) return;
+	
+	// Check if already in the collection
+	auto it = std::find(_imageRenderers.begin(), _imageRenderers.end(), renderer);
+	if (it == _imageRenderers.end())
+	{
+		_imageRenderers.push_back(renderer);
+	}
+}
+
+void Scene::UnsubscribeImageRenderer(ImageRenderer* renderer)
+{
+	if (!renderer) return;
+	
+	auto it = std::find(_imageRenderers.begin(), _imageRenderers.end(), renderer);
+	if (it != _imageRenderers.end())
+	{
+		_imageRenderers.erase(it);
+	}
+}
+
+void Scene::SubscribeTextRenderer(TextRenderer* renderer)
+{
+	if (!renderer) return;
+	
+	// Check if already in the collection
+	auto it = std::find(_textRenderers.begin(), _textRenderers.end(), renderer);
+	if (it == _textRenderers.end())
+	{
+		_textRenderers.push_back(renderer);
+	}
+}
+
+void Scene::UnsubscribeTextRenderer(TextRenderer* renderer)
+{
+	if (!renderer) return;
+	
+	auto it = std::find(_textRenderers.begin(), _textRenderers.end(), renderer);
+	if (it != _textRenderers.end())
+	{
+		_textRenderers.erase(it);
+	}
+}
+
+void Scene::CleanupInvalidRenderers()
+{
+	// Clean up ground sprites
+	_groundSprites.erase(
+		std::remove_if(_groundSprites.begin(), _groundSprites.end(),
+			[](SpriteRenderer* renderer) {
+				return renderer == nullptr;
+			}),
+		_groundSprites.end()
+	);
+	
+	// Clean up texture groups
+	for (auto it = _spriteRenderersByTexture.begin(); it != _spriteRenderersByTexture.end();)
+	{
+		auto& renderers = it->second;
+		renderers.erase(
+			std::remove_if(renderers.begin(), renderers.end(),
+				[](SpriteRenderer* renderer) {
+					return renderer == nullptr;
+				}),
+			renderers.end()
+		);
+		
+		// Remove empty texture groups
+		if (renderers.empty())
+		{
+			it = _spriteRenderersByTexture.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+	
+	// Clean up image renderers
+	_imageRenderers.erase(
+		std::remove_if(_imageRenderers.begin(), _imageRenderers.end(),
+			[](ImageRenderer* renderer) {
+				return renderer == nullptr;
+			}),
+		_imageRenderers.end()
+	);
+	
+	// Clean up text renderers
+	_textRenderers.erase(
+		std::remove_if(_textRenderers.begin(), _textRenderers.end(),
+			[](TextRenderer* renderer) {
+				return renderer == nullptr;
+			}),
+		_textRenderers.end()
+	);
+}
+
 void Scene::Awake()
 {
 	if (_asleepObjects.empty()) return;
@@ -209,110 +388,61 @@ void Scene::Update(float deltaTime)
 
 void Scene::Render()
 {
+	// Clean up any invalid renderers first
+	CleanupInvalidRenderers();
+	
 	// Get camera position
 	glm::vec3 cameraPos(0.0f, 0.0f, 0.0f);
 	Camera* mainCamera = Camera::GetMain();
 	if (mainCamera) {
-		const Transform& cameraTransform = mainCamera->GetGameObject().GetTransform();
-		cameraPos = glm::vec3(
-			cameraTransform.GetPosition().x,
-			cameraTransform.GetPosition().y,
-			cameraTransform.GetPosition().z
-		);
-	}
-    
-    // Check active objects
-    for (auto& gameObject : _activeObjects) {
-        if (gameObject.second->HasTag("Ground")) {
-            gameObject.second->Render();
-        }
-    }
-    
-	std::vector<std::pair<GameObject*, float>> renderableObjects;
-
-	glm::mat4 V(1.0f), P(1.0f);
-	if (mainCamera) {
-		V = mainCamera->GetViewMatrix();
-		P = mainCamera->GetProjectionMatrix();
+		glm::vec3 cameraPos = mainCamera->GetGameObject().GetTransform().position.ToVec3();
 	}
 
-	// Collect all renderable objects from hierarchy
-	for (auto& gameObject : _activeObjects) {
-		CollectRenderableObjects(gameObject.second.get(), renderableObjects, V, P);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_ALPHA_TEST);
+
+	// Render ground sprites separately (first layer)
+	if (!_groundSprites.empty())
+	{
+		SpriteRenderer::RenderBatch(_groundSprites);
 	}
 
-	std::sort(renderableObjects.begin(), renderableObjects.end(),
-		[](const std::pair<GameObject*, float>& a, const std::pair<GameObject*, float>& b) {
-			return a.second > b.second; // top first, bottom last (in front)
-		});
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_ALPHA_TEST);
 
-	// Render other objects
-	for (auto& [gameObject, ndcY] : renderableObjects) {
-		gameObject->Render();
+	// Render all other SpriteRenderers grouped by texture for efficient batch rendering
+	for (const auto& [textureId, renderers] : _spriteRenderersByTexture)
+	{
+		if (!renderers.empty())
+		{
+			SpriteRenderer::RenderBatch(renderers);
+		}
 	}
 
 	glDisable(GL_CULL_FACE);
-	// Render text and UI elements
-	for (auto& it : _activeObjects) {
-		RenderUIElements(it.second.get());
-	}
-	glEnable(GL_CULL_FACE);
-}
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_ALPHA_TEST);
 
-void Scene::CollectRenderableObjects(GameObject* root, std::vector<std::pair<GameObject*, float>>& renderableObjects, 
-                                   const glm::mat4& V, const glm::mat4& P)
-{
-	if (!root->IsActive()) return;
-
-	// Skip ground objects (already rendered)
-	if (root->HasTag("Ground") || root->HasTag("UI")) return;
-
-	if (root->GetComponent<SpriteRenderer>() != nullptr) {
-		const Transform& objTransform = root->GetTransform();
-		glm::vec3 worldPos(
-			objTransform.GetWorldPosition().x,
-			objTransform.GetWorldPosition().y,
-			objTransform.GetWorldPosition().z
-		);
-
-		// Project to clip space, then to NDC
-		glm::vec4 clip = P * V * glm::vec4(worldPos, 1.0f);
-		if (clip.w == 0.0f) return;
-
-		float ndcY = clip.y / clip.w; // -1 bottom ... +1 top
-
-		renderableObjects.emplace_back(root, ndcY);
-	}
-
-	// Process children
-	for (GameObject* child : root->GetChildren())
+	// Render UI elements using cached collections
+	for (ImageRenderer* renderer : _imageRenderers)
 	{
-		CollectRenderableObjects(child, renderableObjects, V, P);
+		if (renderer && renderer->IsActive())
+		{
+			renderer->Render();
+		}
 	}
-}
-
-void Scene::RenderUIElements(GameObject* root)
-{
-	if (!root->IsActive()) return;
-
-	// Render text and image renderers
-	if (auto* tr = root->GetComponent<TM::Graphics::ImageRenderer>())
-	{
-		if (tr->IsActive())
-			tr->Render();
-	} 
 	
-	if (auto* tr = root->GetComponent<TM::Graphics::TextRenderer>())
+	for (TextRenderer* renderer : _textRenderers)
 	{
-		if (tr->IsActive())
-			tr->Render();
+		if (renderer && renderer->IsActive())
+		{
+			renderer->Render();
+		}
 	}
-
-	// Process children
-	for (GameObject* child : root->GetChildren())
-	{
-		RenderUIElements(child);
-	}
+	
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_ALPHA_TEST);
 }
 
 void Scene::Destroy()
@@ -338,4 +468,8 @@ void Scene::Destroy()
 	_asleepObjects.clear();
 	_awakenObjects.clear();
 	_activeObjects.clear();
+	_spriteRenderersByTexture.clear();
+	_groundSprites.clear();
+	_imageRenderers.clear();
+	_textRenderers.clear();
 }

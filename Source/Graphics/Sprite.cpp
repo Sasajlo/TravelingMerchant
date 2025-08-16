@@ -75,6 +75,12 @@ void Sprite::SetTexture(std::string texturePath)
     _currentFrame = 0;
 
     UpdateTextureCoordinates();
+
+    // Notify about texture change
+    if (_onTextureChanged)
+    {
+        _onTextureChanged(_textureId);
+    }
 }
 
 void Sprite::SetSpriteSheet(std::string texturePath, int columns, int rows)
@@ -88,6 +94,12 @@ void Sprite::SetSpriteSheet(std::string texturePath, int columns, int rows)
     _frameTimer = 0.0f;
 
     UpdateTextureCoordinates();
+
+    // Notify about texture change
+    if (_onTextureChanged)
+    {
+        _onTextureChanged(_textureId);
+    }
 }
 
 void Sprite::SetCurrentFrame(int frame)

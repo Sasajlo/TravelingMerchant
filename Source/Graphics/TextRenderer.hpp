@@ -32,8 +32,15 @@ namespace TM
             ~TextRenderer() = default;
 
             void Awake() override;
+            void Start() override;
             void Render() override;
             void Destroy() override;
+
+            void SetActive(bool active) override;
+
+            // Subscription management
+            void SubscribeToScene();
+            void UnsubscribeFromScene();
 
             void SetFont(const std::string& path, float pixelHeight);
             void SetText(const std::string& text) { _text = text; }

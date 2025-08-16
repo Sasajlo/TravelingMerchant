@@ -21,7 +21,7 @@ namespace TM
             Component(GameObject& gameObject) : _gameObject(gameObject) {}
             ~Component() = default;
 
-            void SetActive(bool active) { _isActive = active; }
+            virtual void SetActive(bool active) { _isActive = active; }
             bool IsActive() { return _isActive; }
 
             // Virtual methods that components can override

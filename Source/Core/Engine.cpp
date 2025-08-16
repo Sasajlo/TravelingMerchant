@@ -22,6 +22,7 @@ bool Engine::Initialize(const std::string& title, int width, int height, bool fu
 
 void Engine::Run()
 {
+	int fps = 0;
 	std::cout << "Engine is running!" << std::endl;
 	while (!Instance()._window.ShouldClose())
 	{
@@ -34,6 +35,13 @@ void Engine::Run()
 
 		// Handle delta time calculation
 		Instance()._time.Update();
+
+		int newFps = Instance().GetFPS();
+		if (fps != newFps)
+		{
+			fps = newFps;
+			Instance()._window.UpdateFPS(fps);
+		}
 
 		// Poll for events
 		Instance()._window.PollEvents();

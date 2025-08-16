@@ -51,7 +51,7 @@ namespace TM
 			);
 		}
 
-		glm::mat4 Transform::GetWorldMatrix() const
+		glm::mat4 Transform::GetWorldMatrix()
 		{
 			GameObject* parent = _gameObject.GetParent();
 			if (parent == nullptr)

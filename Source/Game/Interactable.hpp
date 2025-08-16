@@ -19,6 +19,7 @@ namespace TM
         {
         private:
             bool _hovered = false;
+            SpriteRenderer* _spriteRenderer;
 
             void SpawnLogs()
             {
@@ -28,7 +29,7 @@ namespace TM
                     std::string logName = _gameObject.GetName() + " Log " + std::to_string(i);
                     GameObject* logObject = GameObject::Create(logName);
                     logObject->transform.SetPosition(_gameObject.transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
-                    logObject->transform.SetScale(0.6f, 0.6f, 0.0f);
+                    logObject->transform.SetScale(0.6f, 0.6f, 0.6f);
                     logObject->AddTag("Log");
                     Sprite* sprite = logObject->AddComponent<Sprite>();
                     sprite->SetTexture("Assets/Textures/log.png");
@@ -47,7 +48,7 @@ namespace TM
                     std::string logName = _gameObject.GetName() + " Rocks " + std::to_string(i);
                     GameObject* rocksObject = GameObject::Create(logName);
                     rocksObject->transform.SetPosition(_gameObject.transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
-                    rocksObject->transform.SetScale(0.45f, 0.45f, 0.0f);
+                    rocksObject->transform.SetScale(0.45f, 0.45f, 0.45f);
                     rocksObject->AddTag("Rocks");
                     Sprite* sprite = rocksObject->AddComponent<Sprite>();
                     sprite->SetTexture("Assets/Textures/rocks.png");
@@ -61,8 +62,13 @@ namespace TM
         public:
             Interactable(GameObject& gameObject) : Component(gameObject) {}
 
-            void SetHovered(bool h) { _hovered = h; }
+            void SetHovered(bool h) { _hovered = h; if (_spriteRenderer) _spriteRenderer->SetHovered(h); }
             bool IsHovered() const { return _hovered; }
+
+            void Awake() override
+            {
+                _spriteRenderer = _gameObject.GetComponent<SpriteRenderer>();
+            }
 
             void Interact(GameObject* player) 
             {

@@ -1,6 +1,7 @@
 #include <Graphics/TextRenderer.hpp>
 #include <Core/Engine.hpp>
 #include <Utils/Color.hpp>
+#include <Core/SceneManager.hpp>
 
 #include <vector>
 #include <fstream>
@@ -90,8 +91,16 @@ void TextRenderer::Awake()
     }
 }
 
+void TextRenderer::Start()
+{
+    // Subscribe to the scene when the component starts
+    SubscribeToScene();
+}
+
 void TextRenderer::Render()
 {
+    if (!IsActive() || !_gameObject.IsActive()) return;
+
     if (_atlasTex == 0 || _text.empty()) return;
 
     auto size = Engine::GetWindowSize();
@@ -159,8 +168,41 @@ void TextRenderer::Render()
 
 void TextRenderer::Destroy()
 {
+    // Unsubscribe from the scene when the component is destroyed
+    UnsubscribeFromScene();
+    
     if (_atlasTex) glDeleteTextures(1, &_atlasTex);
     if (_vbo) glDeleteBuffers(1, &_vbo);
     if (_vao) glDeleteVertexArrays(1, &_vao);
     _shader.Destroy();
+}
+
+void TextRenderer::SetActive(bool active)
+{
+    // Call the base class SetActive first
+    Component::SetActive(active);
+
+    // If becoming active, resubscribe to the scene
+    if (active)
+    {
+        SubscribeToScene();
+    }
+}
+
+void TextRenderer::SubscribeToScene()
+{
+    // Get the current scene
+    Scene* currentScene = SceneManager::GetActiveScene();
+    if (!currentScene) return;
+
+    currentScene->SubscribeTextRenderer(this);
+}
+
+void TextRenderer::UnsubscribeFromScene()
+{
+    // Get the current scene
+    Scene* currentScene = SceneManager::GetActiveScene();
+    if (!currentScene) return;
+
+    currentScene->UnsubscribeTextRenderer(this);
 }

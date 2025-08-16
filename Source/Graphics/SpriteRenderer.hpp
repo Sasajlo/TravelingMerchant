@@ -16,22 +16,41 @@ namespace TM
 		private:
 			Shader _shader;
 			Sprite* _sprite;
+			unsigned int _currentTextureId = 0; // Track current texture ID for subscription
 
 			bool _enableSwaying = false;
 			float _swayAmount = 0.02f;
 			float _swaySpeed = 1.0f;
+
+			bool _hovered = false;
+
+			// Static members for batch rendering
+			static unsigned int _instanceVBO;
+			static bool _instanceVBOInitialized;
+			static Shader _instancedShader;
 
 		public:
 			SpriteRenderer(GameObject& gameObject) : Component(gameObject) {}
 			~SpriteRenderer() = default;
 
 			void Awake() override;
+			void Start() override;
 			void Render() override;
 			void Destroy() override;
 
 			void EnableSwaying(bool enable) { _enableSwaying = enable; }
 			void SetSwayAmount(float amount) { _swayAmount = amount; }
 			void SetSwaySpeed(float speed) { _swaySpeed = speed; }
+
+			void SetHovered(bool hovered) { _hovered = hovered; }
+			bool IsHovered();
+
+			// Subscription management
+			void SubscribeToScene();
+			void UnsubscribeFromScene();
+			void UpdateTextureSubscription(unsigned int newTextureId);
+
+			static void RenderBatch(const std::vector<SpriteRenderer*>& renderers);
 		};
 	}
 }

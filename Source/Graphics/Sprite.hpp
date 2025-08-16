@@ -40,6 +40,9 @@ namespace TM
 			int _rows = 1;
 			int _animationOffset = 0; // Add this to track current animation offset (row or column)
 
+			// Add a callback for texture changes
+			std::function<void(unsigned int)> _onTextureChanged;
+
 			void UpdateVertexData(); // Update vertex positions based on pivot
 			void UpdateTextureCoordinates(); // Update texture coordinates for animation
 
@@ -93,6 +96,9 @@ namespace TM
 			TM::Utils::Color& GetColor() { return _color; }
 
 			unsigned int GetTextureId() const { return _textureId; }
+
+			// Set texture change callback
+			void SetTextureChangedCallback(std::function<void(unsigned int)> callback) { _onTextureChanged = callback; }
 		};
 
 	}

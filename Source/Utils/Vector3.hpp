@@ -49,6 +49,8 @@ namespace TM
 
 			Vector3 RotateAroundY(float angle);
 
+			glm::vec3 ToVec3() { return { x, y, z }; }
+
 			// Global constants
 			static const Vector3 Zero;
 			static const Vector3 One;

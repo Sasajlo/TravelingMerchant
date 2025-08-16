@@ -10,12 +10,14 @@ namespace TM
 		class Shader
 		{
 		private:
-			unsigned int _programId;
+			unsigned int _programId = -1;
 
 		public:
 			Shader() = default;
 			~Shader() = default;
+
 			void Load(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+			bool IsLoaded() { return _programId != -1; }
 
 			void Use();
 			void StopUse();

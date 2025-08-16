@@ -9,11 +9,13 @@
 #include <Graphics/Core.hpp> // glm
 #include <string>
 
+using namespace TM::Core;
+
 namespace TM
 {
     namespace Graphics
     {
-        class ImageRenderer : public TM::Core::Component
+        class ImageRenderer : public Component
         {
         private:
             Shader _shader;
@@ -30,8 +32,15 @@ namespace TM
             ~ImageRenderer() = default;
 
             void Awake() override;
+            void Start() override;
             void Render() override;
             void Destroy() override;
+
+            void SetActive(bool active) override;
+
+            // Subscription management
+            void SubscribeToScene();
+            void UnsubscribeFromScene();
 
             void SetImage(const std::string& path);
             void SetSize(float w, float h) { _size = { w, h }; }

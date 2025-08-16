@@ -144,8 +144,6 @@ void GameObject::RemoveComponents()
 
 void GameObject::Awake()
 {
-    if (_name == "Slot") std::cout << "Stanimir" << std::endl;
-
     // Process only asleep components (fast)
     if (!_asleepComponents.empty())
     {
@@ -228,6 +226,8 @@ void GameObject::Update(float deltaTime)
         if (child->_isActive)
             child->Update(deltaTime);
     }
+
+    RemoveComponents();
 }
 
 void GameObject::Render()
@@ -247,13 +247,16 @@ void GameObject::Render()
         if (child->_isActive)
             child->Render();
     }
-
-    RemoveComponents();
 }
 
 void GameObject::Destroy()
 {
-    // Destroy all children first
+    // Destroy all children first (including those in the main _children collection)
+    for (GameObject* child : _children)
+    {
+        child->Destroy();
+    }
+
     for (GameObject* child : _awakenChildren)
     {
         child->Destroy();

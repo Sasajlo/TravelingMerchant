@@ -72,8 +72,14 @@ bool Window::Initialize(const std::string& title, int width, int height, bool fu
 	PrintGPUInfo();
 
 	// Enable blending for transparency
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.1f);  // Only render pixels with alpha > 0.1
 
 	// Enable backface culling for 2D sprites
 	glEnable(GL_CULL_FACE);
@@ -162,7 +168,7 @@ void Window::ToggleFullscreen()
 void Window::Clear(Color color)
 {
 	glClearColor(color.r, color.g, color.b, color.a);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Window::SwapBuffers()

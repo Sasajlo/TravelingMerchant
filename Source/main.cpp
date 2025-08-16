@@ -18,13 +18,13 @@ int main()
 	// Create camera object
 	GameObject* cameraObject = GameObject::Create("Main Camera");
 	Camera* camera = cameraObject->AddComponent<Camera>();
-	camera->SetBackgroundColor(Color::GRAY);
+	camera->SetBackgroundColor(Color( 100, 118, 69 ));
 	cameraObject->AddComponent<Debug>();
 
 	// Create player object
 	GameObject* playerObject = GameObject::Create("Player");
 	playerObject->AddComponent<Player>();
-	playerObject->transform.SetScale(2.0f, 2.0f, 0.0f);
+	playerObject->transform.SetScale(2.0f, 2.0f, 2.0f);
 	playerObject->AddTag("Player");
 	Sprite* playerSprite = playerObject->AddComponent<Sprite>();
 	playerSprite->SetPivot(0.5f, 0.35f); // Set pivot to center
@@ -61,7 +61,7 @@ int main()
 		GameObject* treeObject = GameObject::Create(name);
 		treeObject->AddTag("Tree");
 		treeObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		treeObject->transform.SetScale(3.5f, 3.5f, 0.0f);
+		treeObject->transform.SetScale(3.5f, 3.5f, 3.5f);
 		Sprite* baseSprite = treeObject->AddComponent<Sprite>();
 		baseSprite->SetPivot(0.5f, 0.08f); // Set pivot to center
 		baseSprite->SetTexture("Assets/Textures/tree.png");
@@ -76,7 +76,7 @@ int main()
 		{
 			GameObject* treeTopObject = treeObject->CreateChild(name + " Top");
 			treeTopObject->AddTag("Tree");
-			treeTopObject->transform.SetPosition(0.0f, 0.225f, 0.0f);
+			treeTopObject->transform.SetPosition(0.0f, 0.225f, 0.0001f);
 			Sprite* treeTopSprite = treeTopObject->AddComponent<Sprite>();
 			treeTopSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 			treeTopSprite->SetTexture("Assets/Textures/tree_top.png");
@@ -85,7 +85,7 @@ int main()
 			treeTopRenderer->SetSwayAmount(0.03f);  // How much it sways
 			treeTopRenderer->SetSwaySpeed(1.6f);    // Speed of swaying
 			//gameObject->AddComponent<Billboard>();
-			treeTopObject->AddComponent<Interactable>();
+			//treeTopObject->AddComponent<Interactable>();
 		}
 	}
 
@@ -110,7 +110,7 @@ int main()
 		GameObject* gameObject = GameObject::Create(name);
 		gameObject->AddTag("Berry Bush");
 		gameObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		gameObject->transform.SetScale(1.0f, 1.0f, 0.0f);
+		gameObject->transform.SetScale(1.0f, 1.0f, 1.0f);
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
 		sprite->SetPivot(0.5f, 0.1f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/berry_bush.png");
@@ -128,7 +128,7 @@ int main()
 		std::string name = "Plant " + std::to_string(i);
 		GameObject* gameObject = GameObject::Create(name);
 		gameObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
-		gameObject->transform.SetScale(0.6f, 0.6f, 0.0f);
+		gameObject->transform.SetScale(0.6f, 0.6f, 0.6f);
 		gameObject->AddTag("Plant");
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
 		sprite->SetPivot(0.5f, 0.35f); // Set pivot to center

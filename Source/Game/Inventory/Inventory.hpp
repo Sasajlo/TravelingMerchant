@@ -114,21 +114,21 @@ namespace TM
                         int index = y * 6 + x + 1;
 
                         GameObject* slotObject = _bag->CreateChild("Slot " + index);
-                        slotObject->transform.SetPosition(x * SLOT_SEGMENT + SLOT_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + SLOT_PADDING - 155, 0.0f);
+                        slotObject->transform.SetPosition(x * SLOT_SEGMENT + SLOT_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + SLOT_PADDING - 155, 0);
                         auto* slotImage = slotObject->AddComponent<ImageRenderer>();
                         slotImage->SetImage("Assets/Textures/bag_slot.png");
                         slotImage->SetSize(SLOT_SIZE, SLOT_SIZE);
                         slotImage->SetPivot(0.0f, 0.0f);
 
                         GameObject* iconObject = _bag->CreateChild("Slot Icon " + index);
-                        iconObject->transform.SetPosition(x * SLOT_SEGMENT + ICON_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + ICON_PADDING - 155, 0.0f);
+                        iconObject->transform.SetPosition(x * SLOT_SEGMENT + ICON_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + ICON_PADDING - 155, 0);
                         auto* iconImage = iconObject->AddComponent<ImageRenderer>();
                         iconImage->SetSize(ICON_SIZE, ICON_SIZE);
                         iconImage->SetPivot(0.0f, 0.0f);
                         iconImage->SetActive(false);
 
                         GameObject* textObject = _bag->CreateChild("Item Count Text " + index);
-                        textObject->transform.SetPosition(x * SLOT_SEGMENT + TEXT_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + TEXT_PADDING - 155, 0.0f);
+                        textObject->transform.SetPosition(x * SLOT_SEGMENT + TEXT_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + TEXT_PADDING - 155, 0);
                         auto* amountText = textObject->AddComponent<TextRenderer>();
                         amountText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 26.0f);
                         amountText->SetText("0");

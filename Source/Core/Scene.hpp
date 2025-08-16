@@ -5,6 +5,17 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 
+// Forward declarations
+namespace TM
+{
+	namespace Graphics
+	{
+		class SpriteRenderer;
+		class ImageRenderer;
+		class TextRenderer;
+	}
+}
+
 namespace TM
 {
 	namespace Core
@@ -12,6 +23,9 @@ namespace TM
 		class Scene
 		{
 			friend class SceneManager;
+			friend class TM::Graphics::SpriteRenderer;
+			friend class TM::Graphics::ImageRenderer;
+			friend class TM::Graphics::TextRenderer;
 
 		public:
 			Scene(std::string);
@@ -32,6 +46,24 @@ namespace TM
 			// Get all active GameObjects (including children)
 			std::vector<GameObject*> GetActiveGameObjects();
 
+			// SpriteRenderer subscription methods
+			void SubscribeSpriteRenderer(TM::Graphics::SpriteRenderer* renderer, unsigned int textureId);
+			void UnsubscribeSpriteRenderer(TM::Graphics::SpriteRenderer* renderer, unsigned int textureId);
+			void UpdateSpriteRendererTexture(TM::Graphics::SpriteRenderer* renderer, unsigned int oldTextureId, unsigned int newTextureId);
+			
+			// Ground sprite management
+			void AddGroundSprite(TM::Graphics::SpriteRenderer* renderer);
+			void RemoveGroundSprite(TM::Graphics::SpriteRenderer* renderer);
+
+			// UI Renderer subscription methods
+			void SubscribeImageRenderer(TM::Graphics::ImageRenderer* renderer);
+			void UnsubscribeImageRenderer(TM::Graphics::ImageRenderer* renderer);
+			void SubscribeTextRenderer(TM::Graphics::TextRenderer* renderer);
+			void UnsubscribeTextRenderer(TM::Graphics::TextRenderer* renderer);
+
+			// Cleanup methods
+			void CleanupInvalidRenderers();
+
 			void Awake();
 			void Start();
 			void Update(float deltaTime);
@@ -44,15 +76,20 @@ namespace TM
 			std::unordered_map<std::string, std::unique_ptr<GameObject>> _awakenObjects;
 			std::unordered_map<std::string, std::unique_ptr<GameObject>> _activeObjects;
 
+			// SpriteRenderer subscription system - grouped by texture ID
+			std::unordered_map<unsigned int, std::vector<TM::Graphics::SpriteRenderer*>> _spriteRenderersByTexture;
+			
+			// Separate collection for ground sprites (rendered separately)
+			std::vector<TM::Graphics::SpriteRenderer*> _groundSprites;
+
+			// UI Renderer subscription systems
+			std::vector<TM::Graphics::ImageRenderer*> _imageRenderers;
+			std::vector<TM::Graphics::TextRenderer*> _textRenderers;
+
 			// Helper methods for finding objects in hierarchy
 			GameObject* FindGameObjectInHierarchy(const std::string& name, GameObject* root);
 			void FindGameObjectsByTagInHierarchy(const std::string& tag, GameObject* root, std::vector<GameObject*>& results);
 			void GetAllGameObjectsInHierarchy(GameObject* root, std::vector<GameObject*>& results);
-			
-			// Helper methods for rendering
-			void CollectRenderableObjects(GameObject* root, std::vector<std::pair<GameObject*, float>>& renderableObjects, 
-                                        const glm::mat4& V, const glm::mat4& P);
-			void RenderUIElements(GameObject* root);
 		};
 	}
 }

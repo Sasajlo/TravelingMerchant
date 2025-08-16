@@ -1,5 +1,6 @@
 #include <Graphics/ImageRenderer.hpp>
 #include <Core/Engine.hpp>
+#include <Core/SceneManager.hpp>
 
 using namespace TM::Graphics;
 using namespace TM::Core;
@@ -61,8 +62,15 @@ void ImageRenderer::Awake()
     glBindVertexArray(0);
 }
 
+void ImageRenderer::Start()
+{
+    // Subscribe to the scene when the component starts
+    SubscribeToScene();
+}
+
 void ImageRenderer::Render()
 {
+    if (!IsActive() || !_gameObject.IsActive()) return;
     if (_textureId == 0) return;
 
     auto size = Engine::GetWindowSize();
@@ -110,7 +118,40 @@ void ImageRenderer::Render()
 
 void ImageRenderer::Destroy()
 {
+    // Unsubscribe from the scene when the component is destroyed
+    UnsubscribeFromScene();
+    
     if (_vbo) glDeleteBuffers(1, &_vbo);
     if (_vao) glDeleteVertexArrays(1, &_vao);
     _shader.Destroy();
+}
+
+void ImageRenderer::SetActive(bool active)
+{
+    // Call the base class SetActive first
+    Component::SetActive(active);
+
+    // If becoming active, resubscribe to the scene
+    if (active)
+    {
+        SubscribeToScene();
+    }
+}
+
+void ImageRenderer::SubscribeToScene()
+{
+    // Get the current scene
+    Scene* currentScene = SceneManager::GetActiveScene();
+    if (!currentScene) return;
+
+    currentScene->SubscribeImageRenderer(this);
+}
+
+void ImageRenderer::UnsubscribeFromScene()
+{
+    // Get the current scene
+    Scene* currentScene = SceneManager::GetActiveScene();
+    if (!currentScene) return;
+
+    currentScene->UnsubscribeImageRenderer(this);
 }
