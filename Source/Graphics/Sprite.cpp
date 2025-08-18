@@ -31,7 +31,11 @@ void Sprite::Update(float deltaTime)
         return;
 
     // Update frame timer
+    _animationTimer += deltaTime;
     _frameTimer += deltaTime;
+
+    if (_isFinished)
+        _isFinished = false;
 
     // Check if it's time to advance to the next frame
     float frameDuration = 1.0f / _frameRate;
@@ -50,7 +54,9 @@ void Sprite::Update(float deltaTime)
             else
             {
                 _currentFrame = _totalFrames - 1;
+                _frameTimer = 0.0f;
                 _isPlaying = false;
+                _isFinished = true;
             }
         }
 
@@ -133,9 +139,10 @@ void Sprite::SetSpriteSheet(std::string texturePath, int columns, int rows)
     _isAnimated = true; // Enable animation
     _columns = columns;
     _rows = rows;
-    _totalFrames = columns * rows;
+    _totalFrames = _direction == AnimationDirection::Horizontal ? columns : rows;
     _currentFrame = 0;
     _frameTimer = 0.0f;
+    _animationTimer = 0.0f;
     SetAnimationOffset(_animationOffset);
 
     //UpdateTextureCoordinates();

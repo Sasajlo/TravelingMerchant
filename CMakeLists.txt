@@ -90,7 +90,7 @@ set(HEADERS
 )
 
 # Create executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} "Source/Game/Interactable.cpp")
 
 # Set the GLAD source file to be compiled as C
 set_source_files_properties(Extern/glad/src/glad.c PROPERTIES LANGUAGE C)

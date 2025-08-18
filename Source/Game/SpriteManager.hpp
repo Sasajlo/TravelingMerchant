@@ -19,13 +19,14 @@ namespace TM
             int columns;
             int rows;
             float frameRate;
+            bool loop;
 
             // Add default constructor
-            AnimationState() : name(""), spritesheetPath(""), columns(1), rows(1), frameRate(12.0f) {}
+            AnimationState() : name(""), spritesheetPath(""), columns(1), rows(1), frameRate(12.0f), loop(false) {}
 
             // Parameterized constructor
-            AnimationState(const std::string& animName, const std::string& path, int cols, int rws, float fps)
-                : name(animName), spritesheetPath(path), columns(cols), rows(rws), frameRate(fps) {
+            AnimationState(const std::string& animName, const std::string& path, int cols, int rws, float fps, bool loop=false)
+                : name(animName), spritesheetPath(path), columns(cols), rows(rws), frameRate(fps), loop(loop) {
             }
         };
 
@@ -34,6 +35,8 @@ namespace TM
         private:
             Sprite* _sprite = nullptr;
             Camera* _camera = nullptr;
+            float _animationLifeTime = 0.0f;
+            bool _isFinished = false;
 
             const int DOWN = 0;
             const int UP = 1;
@@ -46,10 +49,16 @@ namespace TM
             // Animation states storage
             std::map<std::string, AnimationState> _animationStates;
             std::string _currentAnimation = "";
+            std::string _defaultAnimation = "";
+
+            // Animation transitions
+            std::map<std::string, std::vector<std::pair<std::string, std::string>>> _transitions;
+            std::map<std::string, bool> _triggers;
+            std::map<std::string, bool> _booleans;
 
             void UpdateDirection()
             {
-                Vector3 cameraPosition = _camera->GetGameObject().transform.position;
+                Vector3 cameraPosition = _camera->GetGameObject()->transform.position;
                 Vector3 toPlayer = _gameObject.transform.GetWorldPosition() - cameraPosition;
                 toPlayer.y = 0;
                 toPlayer = toPlayer.Normalized();
@@ -90,19 +99,29 @@ namespace TM
 
             void Start() override
             {
-                PlayAnimation("idle");
+                PlayDefaultAnimation();
             }
 
             void Update(float deltaTime) override
             {
+                _isFinished = _sprite->IsFinished();
                 UpdateDirection();
+                CheckTransitions();
+
             }
 
             // Add a new animation state
             void AddAnimationState(const std::string& name, const std::string& spritesheetPath,
-                int columns, int rows, float frameRate)
+                int columns, int rows, float frameRate, bool loop=false)
             {
-                _animationStates[name] = AnimationState(name, spritesheetPath, columns, rows, frameRate);
+                if (_animationStates.size() == 0) _defaultAnimation = name;
+                _animationStates[name] = AnimationState(name, spritesheetPath, columns, rows, frameRate, loop);
+            }
+
+            void PlayDefaultAnimation()
+            {
+                if (_defaultAnimation == "") return;
+                PlayAnimation(_defaultAnimation);
             }
 
             // Play animation by name
@@ -114,6 +133,8 @@ namespace TM
                     const AnimationState& state = it->second;
                     _sprite->SetSpriteSheet(state.spritesheetPath, state.columns, state.rows);
                     _sprite->SetFrameRate(state.frameRate);
+                    _sprite->SetLooping(state.loop);
+                    //_sprite->Play();
                     _currentAnimation = name;
                 }
                 else
@@ -138,6 +159,65 @@ namespace TM
             {
                 return _animationStates.find(name) != _animationStates.end();
             }
+
+            void AddTransition(const std::string& startState, const std::string& endState, const std::string& trigger = "")
+            {
+                _transitions[startState].push_back({ endState, trigger });
+            }
+
+            void CheckTransitions()
+            {
+                if (_currentAnimation == "") return;
+
+                auto transitions = _transitions[_currentAnimation];
+                for (auto& transition : transitions)
+                {
+                    bool inverted = transition.second[0] == '!';
+                    std::string condition = inverted ? transition.second.substr(1) : transition.second;
+                   
+                    if (condition == "") // No condition, check if animation is finished
+                    {
+                        if (_sprite->IsFinished())
+                        {
+                            PlayAnimation(transition.first);
+                            CheckTransitions();
+                            break;
+                        }
+                        continue;
+                    }
+
+                    if (_booleans[condition] ^ inverted || _triggers[condition])
+                    {
+                        PlayAnimation(transition.first);
+                        CheckTransitions();
+                        break;
+                    }
+                }
+
+                ResetTrigers();
+            }
+
+            void SetTrigger(const std::string& name)
+            {
+                _triggers[name] = true;
+            }
+
+            void ResetTrigers()
+            {
+                for (auto& trigger : _triggers)
+                {
+                    trigger.second = false;
+                }
+            }
+
+            void SetBool(const std::string& name, bool value)
+            {
+                _booleans[name] = value;
+            }
+
+            float GetAnimationLifeTime() { return _sprite->GetAnimationLifeTime(); }
+
+            bool IsFinished() const { return _isFinished; }
         };
     }
 }

@@ -199,7 +199,7 @@ void Scene::SubscribeSpriteRenderer(SpriteRenderer* renderer, unsigned int textu
 	if (!renderer) return;
 
 	// Check if this is a ground sprite and add it to ground collection
-	if (renderer->GetGameObject().HasTag("Ground"))
+	if (renderer->GetGameObject()->HasTag("Ground"))
 	{
 		AddGroundSprite(renderer);
 		return; // Don't add to texture groups
@@ -213,7 +213,7 @@ void Scene::UnsubscribeSpriteRenderer(SpriteRenderer* renderer, unsigned int tex
 	if (!renderer) return;
 
 	// Check if this is a ground sprite and remove it from ground collection
-	if (renderer->GetGameObject().HasTag("Ground"))
+	if (renderer->GetGameObject()->HasTag("Ground"))
 	{
 		RemoveGroundSprite(renderer);
 		return; // Don't remove from texture groups
@@ -241,7 +241,7 @@ void Scene::UpdateSpriteRendererTexture(SpriteRenderer* renderer, unsigned int o
 	if (!renderer) return;
 
 	// Ground sprites don't need texture updates since they're rendered separately
-	if (renderer->GetGameObject().HasTag("Ground")) return;
+	if (renderer->GetGameObject()->HasTag("Ground")) return;
 
 	// Unsubscribe from old texture group
 	UnsubscribeSpriteRenderer(renderer, oldTextureId);
@@ -424,7 +424,7 @@ void Scene::Render()
 	glm::vec3 cameraPos(0.0f, 0.0f, 0.0f);
 	Camera* mainCamera = Camera::GetMain();
 	if (mainCamera) {
-		glm::vec3 cameraPos = mainCamera->GetGameObject().GetTransform().position.ToVec3();
+		glm::vec3 cameraPos = mainCamera->GetGameObject()->GetTransform().position.ToVec3();
 	}
 
 	glDisable(GL_DEPTH_TEST);

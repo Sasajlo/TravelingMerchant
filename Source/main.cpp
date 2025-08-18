@@ -51,10 +51,7 @@ int main()
 		slimeObject->AddComponent<Slime>();
 		slimeObject->AddComponent<SpriteRenderer>();
 		slimeObject->AddComponent<Billboard>();
-		auto _spriteManager = slimeObject->AddComponent<SpriteManager>();
-		_spriteManager->AddAnimationState("idle", "Assets/Textures/Mobs/Animations/Slime/slime_idle.png", 4, 4, 5.5f);
-		_spriteManager->AddAnimationState("move", "Assets/Textures/Mobs/Animations/Slime/slime_idle.png", 4, 4, 7.0f);
-		_spriteManager->AddAnimationState("death", "Assets/Textures/Mobs/Animations/Slime/slime_death.png", 5, 1, 10.0f);
+		slimeObject->AddComponent<SpriteManager>();
 	}
 
 /**************************************************************** WORLD GENERATION ****************************************************************/
@@ -96,7 +93,7 @@ int main()
 		{
 			GameObject* treeTopObject = treeObject->CreateChild(name + " Top");
 			treeTopObject->AddTag("Tree");
-			treeTopObject->transform.SetPosition(0.0f, 0.225f, 0.0001f);
+			treeTopObject->transform.SetPosition(0.0f, 0.133f, 0.0001f);
 			Sprite* treeTopSprite = treeTopObject->AddComponent<Sprite>();
 			treeTopSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 			treeTopSprite->SetTexture("Assets/Textures/tree_top.png");
@@ -104,8 +101,6 @@ int main()
 			treeTopRenderer->EnableSwaying(true);
 			treeTopRenderer->SetSwayAmount(0.03f);  // How much it sways
 			treeTopRenderer->SetSwaySpeed(1.6f);    // Speed of swaying
-			//gameObject->AddComponent<Billboard>();
-			//treeTopObject->AddComponent<Interactable>();
 		}
 	}
 

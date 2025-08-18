@@ -31,8 +31,10 @@ namespace TM
 			int _currentFrame = 0;
 			float _frameRate = 12.0f; // Frames per second
 			float _frameTimer = 0.0f;
+			float _animationTimer = 0.0f;
 			AnimationDirection _direction = AnimationDirection::Horizontal;
-			bool _isPlaying = true;
+			bool _isPlaying = false;
+			bool _isFinished = false;
 			bool _loop = true;
 
 			// Sprite sheet properties
@@ -79,6 +81,8 @@ namespace TM
 			void SetAnimationOffset(int offset);
 			int GetAnimationOffset() const { return _animationOffset; }
 
+			float GetAnimationLifeTime() const { return _animationTimer; }
+
 			// Animation control methods
 			void Play() { _isPlaying = true; }
 			void Pause() { _isPlaying = false; }
@@ -89,6 +93,7 @@ namespace TM
 
 			bool IsPlaying() const { return _isPlaying; }
 			bool IsAnimated() const { return _isAnimated; }
+			bool IsFinished() const { return _loop ? false : _isFinished; }
 
 			// Color methods
 			void SetColor(const TM::Utils::Color& color) { _color = color; }

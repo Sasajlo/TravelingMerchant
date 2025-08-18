@@ -24,7 +24,7 @@ namespace TM
 
             void Update(float deltaTime) override
             {
-                GameObject& cameraObject = Camera::GetMain()->GetGameObject();
+                GameObject& cameraObject = *Camera::GetMain()->GetGameObject();
                 _gameObject.transform.rotation = cameraObject.transform.rotation;
             }
         };

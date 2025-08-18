@@ -36,6 +36,9 @@ namespace TM
             {
                 Interactable::Awake();
                 _spriteManager = _gameObject.GetComponent<SpriteManager>();
+                _spriteManager->AddAnimationState("idle", "Assets/Textures/Mobs/Animations/Slime/slime_idle.png", 4, 4, 5.5f, true);
+                _spriteManager->AddAnimationState("move", "Assets/Textures/Mobs/Animations/Slime/slime_idle.png", 4, 4, 7.0f, true);
+                _spriteManager->AddAnimationState("death", "Assets/Textures/Mobs/Animations/Slime/slime_death.png", 5, 1, 10.0f);
             }
 
             void Update(float deltaTime) override
@@ -72,7 +75,13 @@ namespace TM
                 }
             }
 
-            void Interact(GameObject* player) override
+            void StartInteraction(Player* player) override
+            {
+                Interactable::StartInteraction(player);
+                player->Chop(this);
+            }
+
+            void Interact(Player* player) override
             {
                 Die();
             }

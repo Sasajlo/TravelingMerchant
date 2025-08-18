@@ -14,8 +14,8 @@ namespace TM
             friend class GameObject;
 
         protected:
-            GameObject& _gameObject;
             bool _isActive = true;
+            GameObject& _gameObject;
 
         public:
             Component(GameObject& gameObject) : _gameObject(gameObject) {}
@@ -32,7 +32,7 @@ namespace TM
             virtual void Destroy() { }
 
             // Getters
-            GameObject& GetGameObject() const { return _gameObject; }
+            GameObject* GetGameObject() const { return &_gameObject; }
         };
     }
 }

@@ -40,7 +40,7 @@ Raycast::Ray Raycast::ScreenPointToRay(float screenX, float screenY, int screenW
 	glm::vec3 rayDir = glm::normalize(glm::vec3(rayWorld.x, rayWorld.y, rayWorld.z));
 
 	// Get camera position
-	const Transform& cameraTransform = camera->GetGameObject().GetTransform();
+	const Transform& cameraTransform = camera->GetGameObject()->transform;
 	Vector3 cameraPos = cameraTransform.GetPosition();
 
 	return { cameraPos, Vector3(rayDir.x, rayDir.y, rayDir.z) };

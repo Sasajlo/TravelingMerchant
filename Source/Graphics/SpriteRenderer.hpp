@@ -56,6 +56,8 @@ namespace TM
 			void UnsubscribeFromScene();
 			void UpdateTextureSubscription(unsigned int newTextureId);
 
+			bool IsAnimationFinished() const { return _sprite->IsFinished(); }
+
 			static void InitializeBatchVAO();
 
 			static void RenderBatch(const std::vector<SpriteRenderer*>& renderers);
