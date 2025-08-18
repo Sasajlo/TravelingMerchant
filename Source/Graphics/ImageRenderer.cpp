@@ -33,8 +33,6 @@ bool ImageRenderer::IsMouseOver()
 
 void ImageRenderer::Awake()
 {
-    if (_gameObject.GetName() == "Slot") std::cout << "LOL" << std::endl;
-
     _gameObject.AddTag("UI");
 
     _shader.Load("Shaders/ImageUI.vert", "Shaders/ImageUI.frag");

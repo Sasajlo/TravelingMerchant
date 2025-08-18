@@ -17,7 +17,7 @@ namespace TM
     {
         class Interactable : public Component
         {
-        private:
+        protected:
             bool _hovered = false;
             SpriteRenderer* _spriteRenderer;
 
@@ -33,7 +33,7 @@ namespace TM
                     logObject->AddTag("Log");
                     Sprite* sprite = logObject->AddComponent<Sprite>();
                     sprite->SetTexture("Assets/Textures/log.png");
-                    sprite->SetPivot(0.5f, 0.1f); // Set pivot to center
+                    sprite->SetPivot(0.5f, 0.45); // Set pivot to center
                     logObject->AddComponent<SpriteRenderer>();
                     logObject->AddComponent<Billboard>();
                     logObject->AddComponent<Interactable>();
@@ -70,7 +70,7 @@ namespace TM
                 _spriteRenderer = _gameObject.GetComponent<SpriteRenderer>();
             }
 
-            void Interact(GameObject* player) 
+            virtual void Interact(GameObject* player) 
             {
                 if (_gameObject.HasTag("Tree"))
                 {
@@ -98,6 +98,10 @@ namespace TM
                 {
                     player->GetComponent<Inventory>()->AddItem({ "Rocks", "Assets/Textures/Icons/rocks_icon.png", 1 });
                 }
+                else
+                {
+                    return;
+                }
 
 
                 if (!_gameObject.HasTag("Berry Bush"))
@@ -106,7 +110,7 @@ namespace TM
                 }
             }
 
-            std::string GetInteractionText()
+            virtual std::string GetInteractionText()
             {
                 if (_gameObject.HasTag("Tree"))
                 {
@@ -130,7 +134,11 @@ namespace TM
                 }
                 else if (_gameObject.HasTag("Plant"))
                 {
-                    return "Collect Plant";
+                    return "Collect Herb";
+                }
+                else if (_gameObject.HasTag("Slime"))
+                {
+                    return "Attack Slime";
                 }
 
                 return "Interact with " + _gameObject.GetName();

@@ -114,7 +114,7 @@ Raycast::HitResult Raycast::RaycastUI(Vector3 mousePos, GameObject* gameObject)
 	}
 
 	// Check if this is a UI element
-	if (!gameObject->HasTag("UI")) {
+	if (!gameObject->HasTag("UI") || !gameObject->IsActive()) {
 		HitResult hit;
 		return hit;
 	}

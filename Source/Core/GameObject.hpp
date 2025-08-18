@@ -23,6 +23,7 @@ namespace TM
             GameObject(const std::string& name = "Game Object");
             std::string _name;
 			bool _isActive = true;
+            bool _shouldDelete = false;
 
             // Tag system
             std::unordered_set<std::string> _tags;
@@ -109,17 +110,43 @@ namespace TM
             template<typename T>
             T* GetComponent()
             {
-                // Always get from active collection - stable pointers
+                // Check for exact type match first (for performance)
                 std::type_index typeIndex = std::type_index(typeid(T));
                 auto it = _activeComponents.find(typeIndex);
-                return it != _activeComponents.end() ? static_cast<T*>(it->second.get()) : nullptr;
+                if (it != _activeComponents.end()) {
+                    return static_cast<T*>(it->second.get());
+                }
+
+                // If not found, check for derived types
+                for (auto& componentPair : _activeComponents) {
+                    Component* component = componentPair.second.get();
+                    T* result = dynamic_cast<T*>(component);
+                    if (result != nullptr) {
+                        return result;
+                    }
+                }
+
+                return nullptr;
             }
 
             template<typename T>
             bool HasComponent() const
             {
+                // Check for exact type match first (for performance)
                 std::type_index typeIndex = std::type_index(typeid(T));
-                return _activeComponents.find(typeIndex) != _activeComponents.end();
+                if (_activeComponents.find(typeIndex) != _activeComponents.end()) {
+                    return true;
+                }
+
+                // If not found, check for derived types
+                for (const auto& componentPair : _activeComponents) {
+                    const Component* component = componentPair.second.get();
+                    if (dynamic_cast<const T*>(component) != nullptr) {
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
             template<typename T>

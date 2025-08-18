@@ -55,7 +55,7 @@ void Sprite::Update(float deltaTime)
         }
 
         // Update texture coordinates for the new frame
-        UpdateTextureCoordinates();
+        //UpdateTextureCoordinates();
     }
 }
 
@@ -74,13 +74,57 @@ void Sprite::SetTexture(std::string texturePath)
     _totalFrames = 1;
     _currentFrame = 0;
 
-    UpdateTextureCoordinates();
+    //UpdateTextureCoordinates();
 
     // Notify about texture change
     if (_onTextureChanged)
     {
         _onTextureChanged(_textureId);
     }
+}
+
+glm::vec4 Sprite::GetCurrentTextureCoordinates() const
+{
+    if (!_isAnimated || _totalFrames <= 1)
+    {
+        // For static sprites, return full texture coordinates
+        return glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); // (left, bottom, right, top)
+    }
+
+    //return glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+    // Calculate which frame to show based on current frame and direction
+    int frameX, frameY;
+
+    if (_direction == AnimationDirection::Horizontal)
+    {
+        // Frames are arranged horizontally (in rows)
+        frameX = _currentFrame % _columns;
+        frameY = _animationOffset; // Use the animation offset as row
+
+        /*if (_gameObject.GetName() == "Player")
+        {
+            std::cout << _animationOffset << std::endl;
+        }*/
+    }
+    else
+    {
+        // Frames are arranged vertically (in columns)
+        frameX = _animationOffset; // Use the animation offset as column
+        frameY = _currentFrame % _rows;
+    }
+
+    // Calculate texture coordinates for the current frame
+    float frameWidth = 1.0f / _columns;
+    float frameHeight = 1.0f / _rows;
+
+    float texLeft = frameX * frameWidth;
+    float texRight = (frameX + 1) * frameWidth;
+    float texBottom = frameY * frameHeight;
+    float texTop = (frameY + 1) * frameHeight;
+
+    // Return as (left, bottom, right, top) - note Y coordinates are flipped
+    return glm::vec4(texLeft, texBottom, texRight, texTop);
 }
 
 void Sprite::SetSpriteSheet(std::string texturePath, int columns, int rows)
@@ -92,8 +136,9 @@ void Sprite::SetSpriteSheet(std::string texturePath, int columns, int rows)
     _totalFrames = columns * rows;
     _currentFrame = 0;
     _frameTimer = 0.0f;
+    SetAnimationOffset(_animationOffset);
 
-    UpdateTextureCoordinates();
+    //UpdateTextureCoordinates();
 
     // Notify about texture change
     if (_onTextureChanged)
@@ -109,7 +154,7 @@ void Sprite::SetCurrentFrame(int frame)
 
     _currentFrame = glm::clamp(frame, 0, _totalFrames - 1);
     _frameTimer = 0.0f;
-    UpdateTextureCoordinates();
+    //UpdateTextureCoordinates();
 }
 
 void Sprite::SetPivot(float x, float y)
@@ -130,10 +175,10 @@ void Sprite::UpdateVertexData()
     // Vertex data for a quad with texture coordinates (FLIPPED texture coords)
     float vertices[] = {
         // positions              // texture coords (flipped Y)
-        left,  bottom, 0.0f,      0.0f, 1.0f,  // bottom-left
-        right, bottom, 0.0f,      1.0f, 1.0f,  // bottom-right
-        right, top,    0.0f,      1.0f, 0.0f,  // top-right
-        left,  top,    0.0f,      0.0f, 0.0f   // top-left
+        left,  bottom, 0.0f,      0.0f, 0.0f,  // bottom-left
+        right, bottom, 0.0f,      1.0f, 0.0f,  // bottom-right
+        right, top,    0.0f,      1.0f, 1.0f,  // top-right
+        left,  top,    0.0f,      0.0f, 1.0f   // top-left
     };
 
     glBindVertexArray(_VAO);
@@ -166,7 +211,7 @@ void Sprite::SetAnimationOffset(int offset)
     {
         // For horizontal animation, offset represents the row
         // Invert the offset so that offset 0 gives the first row (top)
-        _animationOffset = glm::clamp(_rows - 1 - offset, 0, _rows - 1);
+        _animationOffset = glm::clamp(offset, 0, _rows - 1);
     }
     else
     {
@@ -177,7 +222,7 @@ void Sprite::SetAnimationOffset(int offset)
 
     //_currentFrame = 0; // Reset to first frame of the new offset
     //_frameTimer = 0.0f;
-    UpdateTextureCoordinates();
+    //UpdateTextureCoordinates();
 }
 
 void Sprite::UpdateTextureCoordinates()

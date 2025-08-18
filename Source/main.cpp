@@ -37,6 +37,26 @@ int main()
 	camera->LookAt(playerObject); // Set camera to follow player
 	camera->Follow(playerObject, {}); // Set camera to follow player
 
+/**************************************************************** ENEMIES ****************************************************************/
+
+	// Spawn slimes
+	for (int i = 0; i < 10; i++) {
+		GameObject* slimeObject = GameObject::Create("Slime " + std::to_string(i));
+		slimeObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
+		slimeObject->transform.SetScale(2.0f, 2.0f, 2.0f);
+		slimeObject->AddTag("Enemy");
+		slimeObject->AddTag("Slime");
+		Sprite* slimeSprite = slimeObject->AddComponent<Sprite>();
+		slimeSprite->SetPivot(0.5f, 0.5f); // Set pivot to center
+		slimeObject->AddComponent<Slime>();
+		slimeObject->AddComponent<SpriteRenderer>();
+		slimeObject->AddComponent<Billboard>();
+		auto _spriteManager = slimeObject->AddComponent<SpriteManager>();
+		_spriteManager->AddAnimationState("idle", "Assets/Textures/Mobs/Animations/Slime/slime_idle.png", 4, 4, 5.5f);
+		_spriteManager->AddAnimationState("move", "Assets/Textures/Mobs/Animations/Slime/slime_idle.png", 4, 4, 7.0f);
+		_spriteManager->AddAnimationState("death", "Assets/Textures/Mobs/Animations/Slime/slime_death.png", 5, 1, 10.0f);
+	}
+
 /**************************************************************** WORLD GENERATION ****************************************************************/
 
 	// Create ground
@@ -166,7 +186,7 @@ int main()
 			titleBackground->SetSize(320, 80);
 			titleBackground->SetPivot(0.5f, 0.5f);
 			auto* titleText = titleObject->AddComponent<TextRenderer>();
-			titleText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+			titleText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 22.0f);
 			titleText->SetText("Equipment");
 			titleText->SetPivot(0.5f, 0.5f);
 		}
@@ -191,7 +211,7 @@ int main()
 			titleBackground->SetSize(280, 70);
 			titleBackground->SetPivot(0.5f, 0.5f);
 			auto* titleText = titleObject->AddComponent<TextRenderer>();
-			titleText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+			titleText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 22.0f);
 			titleText->SetText("Bag");
 			titleText->SetPivot(0.5f, 0.5f);
 		}
@@ -209,7 +229,7 @@ int main()
 	inventoryButtonImage->SetPivot(1.0f, 1.0f);
 
 	auto* buttonText = inventoryButtonObject->AddComponent<TextRenderer>();
-	buttonText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
+	buttonText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 16.0f);
 	buttonText->SetText("B");
 	buttonText->SetPivot(1.0f, 1.0f);
 }
@@ -224,7 +244,7 @@ int main()
 	inventoryButtonImage->SetPivot(1.0f, 1.0f);
 
 	auto* buttonText = inventoryButtonObject->AddComponent<TextRenderer>();
-	buttonText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32);
+	buttonText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 16.0f);
 	buttonText->SetText("H");
 	buttonText->SetPivot(1.0f, 1.0f);
 }
@@ -236,7 +256,7 @@ int main()
 		GameObject* object = GameObject::Create("Level Text");
 		object->transform.SetPosition(20.0f, 20.0f, 0.0f);
 		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
+		text->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
 		text->SetPivot(0.0f, 0.0f);
 		text->SetText("Level: 1   XP: 0/100");
 	}
@@ -246,7 +266,7 @@ int main()
 		GameObject* object = GameObject::Create("Health Text");
 		object->transform.SetPosition(20.0f, 50.0f, 0.0f);
 		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
+		text->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
 		text->SetPivot(0.0f, 0.0f);
 		text->SetText("Health: 100/100");
 	}
@@ -256,7 +276,7 @@ int main()
 		GameObject* object = GameObject::Create("Mana Text");
 		object->transform.SetPosition(20.0f, 80, 0.0f);
 		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
+		text->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
 		text->SetPivot(0.0f, 0.0f);
 		text->SetText("Mana: 100/100");
 	}
@@ -266,7 +286,7 @@ int main()
 		GameObject* object = GameObject::Create("Hunger Text");
 		object->transform.SetPosition(20.0f, 110, 0.0f);
 		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 32.0f);
+		text->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
 		text->SetPivot(0.0f, 0.0f);
 		text->SetText("Hunger: 100/100");
 	}
@@ -277,7 +297,7 @@ int main()
 	GameObject* cursorTextObject = GameObject::Create("Cursor Text");
 	cursorTextObject->transform.SetPosition(20.0f, 40.0f, 0.0f);
 	auto* cursorText = cursorTextObject->AddComponent<TextRenderer>();
-	cursorText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 36.0f);
+	cursorText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
 	cursorText->SetPivot(0.0f, 1.0f);
 	cursorText->SetActive(false); // Initially hidden
 
@@ -285,7 +305,7 @@ int main()
 	GameObject* fpsTextObject = GameObject::Create("FPS Text");
 	fpsTextObject->transform.SetPosition(Engine::GetWindowSize().width - 20.0f, 20.0f, 0.0f);
 	auto* fpsText = fpsTextObject->AddComponent<TextRenderer>();
-	fpsText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 48.0f);
+	fpsText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 22.0f);
 	fpsText->SetPivot(1.0f, 0.0f);
 
 	Engine::Run();

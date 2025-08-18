@@ -33,6 +33,8 @@ namespace TM
 
 			void AddGameObject(std::unique_ptr<GameObject> gameObject);
 			void RemoveGameObject(const std::string& name);
+			void RemoveGameObjectDeferred(const std::string& name);
+			void ProcessDeferredDeletions();
 			
 			// Find GameObject by name across all lifecycle collections (including children)
 			GameObject* FindGameObject(const std::string& name);
@@ -75,6 +77,9 @@ namespace TM
 			std::unordered_map<std::string, std::unique_ptr<GameObject>> _asleepObjects;
 			std::unordered_map<std::string, std::unique_ptr<GameObject>> _awakenObjects;
 			std::unordered_map<std::string, std::unique_ptr<GameObject>> _activeObjects;
+
+			// Add to private section:
+			std::vector<std::string> _objectsToDelete;
 
 			// SpriteRenderer subscription system - grouped by texture ID
 			std::unordered_map<unsigned int, std::vector<TM::Graphics::SpriteRenderer*>> _spriteRenderersByTexture;

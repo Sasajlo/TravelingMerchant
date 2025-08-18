@@ -14,6 +14,12 @@ unsigned int SpriteRenderer::_instanceVBO = 0;
 bool SpriteRenderer::_instanceVBOInitialized = false;
 Shader SpriteRenderer::_instancedShader;
 
+// Add these new static members
+unsigned int SpriteRenderer::_batchVAO = 0;
+unsigned int SpriteRenderer::_batchVBO = 0;
+unsigned int SpriteRenderer::_batchEBO = 0;
+bool SpriteRenderer::_batchVAOInitialized = false;
+
 void SpriteRenderer::Awake()
 {
     _shader.Load("Shaders/Sprite.vert", "Shaders/Sprite.frag");
@@ -187,11 +193,13 @@ void SpriteRenderer::RenderBatch(const std::vector<SpriteRenderer*>& renderers)
     // Bind the texture
     firstRenderer->_sprite->Bind();
 
-    // Prepare model matrices and whiten values for all instances
+    // Prepare model matrices, whiten values, and texture coordinates for all instances
     std::vector<glm::mat4> modelMatrices;
     std::vector<float> whitenValues;
+    std::vector<glm::vec4> textureCoordinates;
     modelMatrices.reserve(renderers.size());
     whitenValues.reserve(renderers.size());
+    textureCoordinates.reserve(renderers.size());
 
     for (const auto& renderer : renderers) {
         if (!renderer->IsActive() || !renderer->_gameObject.IsActive()) continue;
@@ -201,6 +209,9 @@ void SpriteRenderer::RenderBatch(const std::vector<SpriteRenderer*>& renderers)
 
             // Calculate whiten value for this specific renderer
             whitenValues.push_back(renderer->IsHovered() ? 0.2f : 0.0f);
+
+            // Get texture coordinates for this specific sprite
+            textureCoordinates.push_back(renderer->_sprite->GetCurrentTextureCoordinates());
         }
     }
 
@@ -233,6 +244,17 @@ void SpriteRenderer::RenderBatch(const std::vector<SpriteRenderer*>& renderers)
     glVertexAttribPointer(7, 1, GL_FLOAT, GL_FALSE, sizeof(float), 0);
     glVertexAttribDivisor(7, 1); // This makes it an instanced attribute
 
+    // Create and bind texture coordinates VBO
+    unsigned int texCoordsVBO;
+    glGenBuffers(1, &texCoordsVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, texCoordsVBO);
+    glBufferData(GL_ARRAY_BUFFER, textureCoordinates.size() * sizeof(glm::vec4), textureCoordinates.data(), GL_DYNAMIC_DRAW);
+
+    // Set up texture coordinates attribute
+    glEnableVertexAttribArray(8); // Use attribute 8 for texture coordinates
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), 0);
+    glVertexAttribDivisor(8, 1); // This makes it an instanced attribute
+
     // Draw all instances
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, modelMatrices.size());
 
@@ -241,7 +263,9 @@ void SpriteRenderer::RenderBatch(const std::vector<SpriteRenderer*>& renderers)
         glDisableVertexAttribArray(3 + i);
     }
     glDisableVertexAttribArray(7);
+    glDisableVertexAttribArray(8);
     glDeleteBuffers(1, &whitenVBO);
+    glDeleteBuffers(1, &texCoordsVBO);
     glBindVertexArray(0);
 }
 

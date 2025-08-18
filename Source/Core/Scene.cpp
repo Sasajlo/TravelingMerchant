@@ -22,29 +22,50 @@ void Scene::AddGameObject(std::unique_ptr<GameObject> gameObject)
 
 void Scene::RemoveGameObject(const std::string& name)
 {
-	auto it = _activeObjects.find(name);
-	if (it != _activeObjects.end())
-	{
-		it->second->Destroy(); // Call Destroy logic
-		_activeObjects.erase(it);
-		return;
-	}
-	it = _awakenObjects.find(name);
-	if (it != _awakenObjects.end())
-	{
-		it->second->Destroy(); // Call Destroy logic
-		_awakenObjects.erase(it);
-		return;
-	}
-	it = _asleepObjects.find(name);
-	if (it != _asleepObjects.end())
-	{
-		it->second->Destroy(); // Call Destroy logic
-		_asleepObjects.erase(it);
-		return;
-	}
-	std::cerr << "GameObject '" << name << "' not found in any collection." << std::endl;
+	// Mark for deferred deletion instead of immediate deletion
+	RemoveGameObjectDeferred(name);
 }
+
+void Scene::RemoveGameObjectDeferred(const std::string& name)
+{
+	// Add to deletion queue instead of immediately deleting
+	_objectsToDelete.push_back(name);
+}
+
+void Scene::ProcessDeferredDeletions()
+{
+	for (const auto& name : _objectsToDelete)
+	{
+		auto it = _activeObjects.find(name);
+		if (it != _activeObjects.end())
+		{
+			it->second->Destroy();
+			_activeObjects.erase(it);
+			continue;
+		}
+
+		it = _awakenObjects.find(name);
+		if (it != _awakenObjects.end())
+		{
+			it->second->Destroy();
+			_awakenObjects.erase(it);
+			continue;
+		}
+
+		it = _asleepObjects.find(name);
+		if (it != _asleepObjects.end())
+		{
+			it->second->Destroy();
+			_asleepObjects.erase(it);
+			continue;
+		}
+
+		std::cerr << "GameObject '" << name << "' not found in any collection." << std::endl;
+	}
+
+	_objectsToDelete.clear();
+}
+
 
 GameObject* Scene::FindGameObject(const std::string& name)
 {
@@ -376,14 +397,22 @@ void Scene::Start()
 	_awakenObjects.clear();
 }
 
+
 void Scene::Update(float deltaTime)
 {
 	if (_activeObjects.empty()) return;
 
+	// Clear any pending deletions from previous frame
+	_objectsToDelete.clear();
+
+	// Update all active objects
 	for (auto& gameObject : _activeObjects)
 	{
 		gameObject.second->Update(deltaTime);
 	}
+
+	// Process all deferred deletions after all updates are complete
+	ProcessDeferredDeletions();
 }
 
 void Scene::Render()

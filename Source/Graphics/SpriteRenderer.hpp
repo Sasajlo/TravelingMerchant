@@ -29,6 +29,12 @@ namespace TM
 			static bool _instanceVBOInitialized;
 			static Shader _instancedShader;
 
+			// Add these new static members for batch VAO
+			static unsigned int _batchVAO;
+			static unsigned int _batchVBO;
+			static unsigned int _batchEBO;
+			static bool _batchVAOInitialized;
+
 		public:
 			SpriteRenderer(GameObject& gameObject) : Component(gameObject) {}
 			~SpriteRenderer() = default;
@@ -49,6 +55,8 @@ namespace TM
 			void SubscribeToScene();
 			void UnsubscribeFromScene();
 			void UpdateTextureSubscription(unsigned int newTextureId);
+
+			static void InitializeBatchVAO();
 
 			static void RenderBatch(const std::vector<SpriteRenderer*>& renderers);
 		};

@@ -2,6 +2,7 @@
 
 // Game module headers
 #include <Game/Player.hpp>
+#include <Game/Slime.hpp>
 #include <Game/Inventory/Inventory.hpp>
 
 #include <Game/Interactable.hpp>

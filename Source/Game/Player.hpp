@@ -47,14 +47,18 @@ namespace TM
 
             void Awake() override
             {
-				_camera = Camera::GetMain();
+                _camera = Camera::GetMain();
                 _cursorText = GameObject::Find("Cursor Text")->GetComponent<TextRenderer>();
                 _spriteManager = _gameObject.GetComponent<SpriteManager>();
+
+                // Add animation states
+                _spriteManager->AddAnimationState("idle", "Assets/Textures/Player/Animations/idle.png", 4, 4, 5.0f);
+                _spriteManager->AddAnimationState("run", "Assets/Textures/Player/Animations/run.png", 6, 4, 8.0f);
             }
 
             void Start() override
             {
-                _spriteManager->SetIdleAnimation();
+                _spriteManager->PlayAnimation("idle");
             }
 
             void Update(float deltaTime) override
@@ -101,13 +105,13 @@ namespace TM
                     if (!_wasMoving)
                     {
                         _wasMoving = true;
-                        _spriteManager->SetRunAnimation();
+                        _spriteManager->PlayAnimation("run");
                     }
                 }
                 else if (_wasMoving && !_goToTarget)
                 {
                     _wasMoving = false;
-                    _spriteManager->SetIdleAnimation();
+                    _spriteManager->PlayAnimation("idle");
                 }
 
                 // Store the input direction
@@ -217,16 +221,20 @@ namespace TM
                 {
                     Vector3 currentPosition = _gameObject.transform.position;
                     Vector3 directionToTarget = _targetPosition - currentPosition;
-                    if (directionToTarget.Length() < 0.1f)
+                    if (directionToTarget.Length() < 0.5f)
                     {
                         if (_targetInteractable)
                         {
                             _targetInteractable->Interact(&_gameObject); // Collect resource when close enough
+
+                            if (_targetInteractable == _hoveredInteractable)
+                                _hoveredInteractable = nullptr;
+
                             _targetInteractable = nullptr; // Clear target resource
 						}
 
                         _goToTarget = false; // Stop moving when close enough
-                        _spriteManager->SetIdleAnimation();
+                        _spriteManager->PlayAnimation("idle");
                         _wasMoving = false;
                     }
                     else
@@ -238,12 +246,12 @@ namespace TM
                         if (!_wasMoving)
                         {
                             _wasMoving = true;
-                            _spriteManager->SetRunAnimation();
+                            _spriteManager->PlayAnimation("run");
                         }
                     }
 				}
 
-                _spriteManager->UpdateDirection(_worldMovementDirection);
+                _spriteManager->SetDirection(_worldMovementDirection);
             }
 
             void CollectResource(Interactable* resource)

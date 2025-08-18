@@ -59,6 +59,7 @@ namespace TM
 			void SetTexture(std::string texturePath);
 			void SetPivot(float x, float y);
 			glm::vec2 GetPivot() { return _pivot; }
+			glm::vec4 GetCurrentTextureCoordinates() const;
 
 			// Animation setup methods
 			void SetSpriteSheet(std::string texturePath, int columns, int rows);

@@ -165,11 +165,8 @@ void GameObject::Awake()
         _asleepChildren.clear();
         for (GameObject* child : asleepCopy)
         {
-            if (child->_isActive)
-            {
-                child->Awake();
-                _awakenChildren.push_back(child);
-            }
+            child->Awake();
+            _awakenChildren.push_back(child);
         }
     }
 }
@@ -195,17 +192,14 @@ void GameObject::Start()
         _awakenChildren.clear();
         for (GameObject* child : awakenCopy)
         {
-            if (child->_isActive)
-            {
-                child->Start();
-            }
+            child->Start();
         }
     }
 }
 
 void GameObject::Update(float deltaTime)
 {
-    if (!_isActive) return;
+    if (!IsActive()) return;
 
     if (!_asleepComponents.empty() || !_asleepChildren.empty())
         Awake();
@@ -216,7 +210,8 @@ void GameObject::Update(float deltaTime)
     // Process only active components (fast)
     for (const auto& component : _activeComponents)
     {
-        if (component.second->IsActive())
+        if (!component.second) continue;
+        if (component.second->_isActive)
             component.second->Update(deltaTime);
     }
 
@@ -232,12 +227,12 @@ void GameObject::Update(float deltaTime)
 
 void GameObject::Render()
 {
-    if (!_isActive) return;
+    if (!IsActive()) return;
 
     // Render all active components
     for (const auto& component : _activeComponents)
     {
-        if (component.second->IsActive())
+        if (component.second->_isActive)
             component.second->Render();
     }
 

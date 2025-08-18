@@ -102,6 +102,7 @@ namespace TM
             void Start() override
             {
                 CreateSlots();
+
             }
 
             void CreateSlots()
@@ -113,27 +114,27 @@ namespace TM
                         // Convert 2D index to 1D
                         int index = y * 6 + x + 1;
 
-                        GameObject* slotObject = _bag->CreateChild("Slot " + index);
+                        GameObject* slotObject = _bag->CreateChild("Slot " + std::to_string(index));
                         slotObject->transform.SetPosition(x * SLOT_SEGMENT + SLOT_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + SLOT_PADDING - 155, 0);
                         auto* slotImage = slotObject->AddComponent<ImageRenderer>();
                         slotImage->SetImage("Assets/Textures/bag_slot.png");
                         slotImage->SetSize(SLOT_SIZE, SLOT_SIZE);
                         slotImage->SetPivot(0.0f, 0.0f);
 
-                        GameObject* iconObject = _bag->CreateChild("Slot Icon " + index);
+                        GameObject* iconObject = _bag->CreateChild("Slot Icon " + std::to_string(index));
                         iconObject->transform.SetPosition(x * SLOT_SEGMENT + ICON_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + ICON_PADDING - 155, 0);
                         auto* iconImage = iconObject->AddComponent<ImageRenderer>();
                         iconImage->SetSize(ICON_SIZE, ICON_SIZE);
                         iconImage->SetPivot(0.0f, 0.0f);
-                        iconImage->SetActive(false);
+                        //iconImage->SetActive(false);
 
-                        GameObject* textObject = _bag->CreateChild("Item Count Text " + index);
+                        GameObject* textObject = _bag->CreateChild("Item Count Text " + std::to_string(index));
                         textObject->transform.SetPosition(x * SLOT_SEGMENT + TEXT_PADDING + 10 - 300.0f, y * SLOT_SEGMENT + TEXT_PADDING - 155, 0);
                         auto* amountText = textObject->AddComponent<TextRenderer>();
-                        amountText->SetFont("Assets/Fonts/LibertinusSerif-Regular.ttf", 26.0f);
+                        amountText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 12.0f);
                         amountText->SetText("0");
                         amountText->SetPivot(0.0f, 0.0f);
-                        amountText->SetActive(false);
+                        //amountText->SetActive(false);
 
                         Slot newSlot(iconImage, amountText);
                         _slots.push_back(newSlot);
@@ -147,6 +148,19 @@ namespace TM
                 {
                     _bagOpened = !_bagOpened;
                     _bag->SetActive(_bagOpened);
+
+                    // Update slot visibility when bag is opened/closed
+                    for (auto& slot : _slots)
+                    {
+                        if (_bagOpened && !slot.IsEmpty())
+                        {
+                            slot.Show();
+                        }
+                        else 
+                        {
+                            slot.Hide();
+                        }
+                    }
                 }
                 if (Input::IsKeyPressed(GLFW_KEY_H)) 
                 {
@@ -191,7 +205,11 @@ namespace TM
                         continue;
                     }
                     slot.SetItem(newItem);
-                    slot.Show();
+
+                    if (_bagOpened) {
+                        slot.Show();
+                    }
+
                     return newItem.amount;
                 }
 
