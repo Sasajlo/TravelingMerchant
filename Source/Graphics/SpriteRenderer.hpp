@@ -4,6 +4,7 @@
 #include <Core/Window.hpp>
 #include <Graphics/Shader.hpp>
 #include <Graphics/Sprite.hpp>
+#include <Graphics/Texture.hpp>
 
 using namespace TM::Core;
 
@@ -23,6 +24,7 @@ namespace TM
 			float _swaySpeed = 1.0f;
 
 			bool _hovered = false;
+			TextureFilter _filterMode = TextureFilter::NEAREST; // Default to pixel-perfect
 
 			// Static members for batch rendering
 			static unsigned int _instanceVBO;

@@ -58,13 +58,13 @@ namespace TM
 			void Bind();
 
 			// Basic sprite methods
-			void SetTexture(std::string texturePath);
+			void SetTexture(std::string texturePath, TextureFilter filter = TextureFilter::NEAREST);
 			void SetPivot(float x, float y);
 			glm::vec2 GetPivot() { return _pivot; }
 			glm::vec4 GetCurrentTextureCoordinates() const;
 
 			// Animation setup methods
-			void SetSpriteSheet(std::string texturePath, int columns, int rows);
+			void SetSpriteSheet(std::string texturePath, int columns, int rows, TextureFilter filter = TextureFilter::NEAREST);
 			void SetFrameRate(float fps) { _frameRate = fps; }
 			float GetFrameRate() const { return _frameRate; }
 

@@ -4,6 +4,9 @@
 #include <Graphics/Graphics.hpp>
 #include <Utils/Utils.hpp>
 #include <Game/Game.hpp>
+#include "Audio/AudioSource.hpp"
+
+using namespace TM::Audio;
 
 int main()
 {
@@ -29,13 +32,88 @@ int main()
 	Sprite* playerSprite = playerObject->AddComponent<Sprite>();
 	playerSprite->SetPivot(0.5f, 0.35f); // Set pivot to center
 	//playerSprite->SetTexture("Assets/Textures/player.png");
+	
 	playerObject->AddComponent<SpriteRenderer>();
 	playerObject->AddComponent<Billboard>();
 	playerObject->AddComponent<SpriteManager>();
-	auto inventory = playerObject->AddComponent<Inventory>();
+	playerObject->AddComponent<PlayerStats>();
+	playerObject->AddComponent<PlayerHUD>();
+	playerObject->AddComponent<Inventory>();
 
 	camera->LookAt(playerObject); // Set camera to follow player
 	camera->Follow(playerObject, {}); // Set camera to follow player
+
+	auto* playerAudoSource = playerObject->AddComponent<AudioSource>();
+	playerAudoSource->SetAudioType(AudioSource::AudioType::ThreeDimensional);
+	playerAudoSource->SetVolume(5.0f);
+	playerAudoSource->SetMinDistance(0.1f);  // Much closer
+	playerAudoSource->SetMaxDistance(500.0f); // Much closer
+	playerAudoSource->SetRolloffFactor(1.0f);
+	playerAudoSource->SetReferenceDistance(10.0f);
+
+/****************************************************************** AUDIO SETUP ******************************************************************/
+
+	// Initialize audio system
+	if (!AudioSource::InitializeAudioSystem()) {
+		std::cerr << "Failed to initialize audio system!" << std::endl;
+	}
+
+	//// Add background music (2D audio)
+	//GameObject* musicObject = GameObject::Create("Background Music");
+	//auto* backgroundMusic = musicObject->AddComponent<TM::Audio::AudioSource>();
+	//backgroundMusic->SetAudioType(TM::Audio::AudioSource::AudioType::TwoDimensional);
+	//backgroundMusic->SetAudioFile("Assets/Sounds/ambient_music.wav");
+	//backgroundMusic->SetVolume(0.3f);
+	//backgroundMusic->SetLooping(true);
+	//backgroundMusic->Play();
+
+	//// Add player footsteps (3D audio)
+	//auto* playerFootsteps = playerObject->AddComponent<TM::Audio::AudioSource>();
+	//playerFootsteps->SetAudioType(TM::Audio::AudioSource::AudioType::ThreeDimensional);
+	//playerFootsteps->SetAudioFile("Assets/Sounds/footsteps.wav");
+	//playerFootsteps->SetVolume(0.7f);
+	//playerFootsteps->SetMinDistance(1.0f);
+	//playerFootsteps->SetMaxDistance(20.0f);
+	//playerFootsteps->SetRolloffFactor(1.0f);
+	//playerFootsteps->SetReferenceDistance(1.0f);
+
+	//// Add UI sound effects (2D audio)
+	//GameObject* uiAudioObject = GameObject::Create("UI Audio");
+	//auto* uiAudio = uiAudioObject->AddComponent<TM::Audio::AudioSource>();
+	//uiAudio->SetAudioType(TM::Audio::AudioSource::AudioType::TwoDimensional);
+	//uiAudio->SetAudioFile("Assets/Sounds/button_click.wav");
+	//uiAudio->SetVolume(0.8f);
+	//uiAudio->SetLooping(false);
+
+/***************************************************************** NPC *****************************************************************/
+
+	// Spawn tutorial NPC
+	{
+		GameObject* npcObject = GameObject::Create("Tutorial NPC");
+		npcObject->transform.SetPosition(Math::RandomFloat(-20.0f, 20.f), 0.0f, Math::RandomFloat(-20.0f, 20.f));
+		npcObject->transform.SetScale(2.0f, 2.0f, 2.0f);
+		npcObject->AddTag("NPC");
+		Sprite* npcSprite = npcObject->AddComponent<Sprite>();
+		npcSprite->SetPivot(0.5f, 0.35f); // Set pivot to center
+		npcSprite->SetSpriteSheet("Assets/Textures/Mobs/NPCs/NPC1/idle.png", 2, 4);
+		npcSprite->SetFrameRate(5.0f);
+		npcObject->AddComponent<SpriteRenderer>();
+		npcObject->AddComponent<SpriteManager>();
+		npcObject->AddComponent<Billboard>();
+		npcObject->AddComponent<Interactable>();
+
+		// Add question mark above NPC
+		{
+			GameObject* questionMarkObject = npcObject->CreateChild("Question Mark");
+			questionMarkObject->transform.SetPosition(0.0f, 0.5f, 0.0001f);
+			questionMarkObject->transform.SetScale(0.25f, 0.25f, 0.25f);
+			Sprite* questionMarkSprite = questionMarkObject->AddComponent<Sprite>();
+			questionMarkSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
+			questionMarkSprite->SetTexture("Assets/Textures/Miscellaneous/question_mark.png", TextureFilter::LINEAR);
+			questionMarkSprite->SetColor(1.0f, 1.0f, 0.0f, 1.0f); // Slightly transparent
+			questionMarkObject->AddComponent<SpriteRenderer>();
+		}
+	}
 
 /**************************************************************** ENEMIES ****************************************************************/
 
@@ -114,6 +192,7 @@ int main()
 		Sprite* sprite = gameObject->AddComponent<Sprite>();
 		sprite->SetPivot(0.5f, 0.15f); // Set pivot to center
 		sprite->SetTexture("Assets/Textures/stone.png");
+		
 		gameObject->AddComponent<SpriteRenderer>();
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
@@ -170,6 +249,7 @@ int main()
 		image->SetImage("Assets/Textures/inventory_equipment.png");
 		image->SetSize(600, 600);
 		image->SetPivot(0.5f, 0.5f);
+		
 		equipmentObject->SetActive(false);
 
 		// Create title
@@ -195,6 +275,7 @@ int main()
 		image->SetImage("Assets/Textures/inventory_container.png");
 		image->SetSize(600, 300);
 		image->SetPivot(0.5f, 0.5f);
+		
 		bagObject->SetActive(false);
 
 		// Create title
@@ -205,85 +286,12 @@ int main()
 			titleBackground->SetImage("Assets/Textures/title_frame.png");
 			titleBackground->SetSize(280, 70);
 			titleBackground->SetPivot(0.5f, 0.5f);
+			
 			auto* titleText = titleObject->AddComponent<TextRenderer>();
 			titleText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 22.0f);
 			titleText->SetText("Bag");
 			titleText->SetPivot(0.5f, 0.5f);
 		}
-	}
-
-/****************************************************************** BUTTONS ******************************************************************/
-
-// Bag Button
-{
-	GameObject* inventoryButtonObject = GameObject::Create("Bag Button");
-	inventoryButtonObject->transform.SetPosition(Engine::GetWindowSize().width - 20.0f, Engine::GetWindowSize().height - 10.f, 0.0f);
-	auto* inventoryButtonImage = inventoryButtonObject->AddComponent<ImageRenderer>();
-	inventoryButtonImage->SetImage("Assets/Textures/Buttons/bag_button.png");
-	inventoryButtonImage->SetSize(75, 75);
-	inventoryButtonImage->SetPivot(1.0f, 1.0f);
-
-	auto* buttonText = inventoryButtonObject->AddComponent<TextRenderer>();
-	buttonText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 16.0f);
-	buttonText->SetText("B");
-	buttonText->SetPivot(1.0f, 1.0f);
-}
-
-// Equipment Button
-{
-	GameObject* inventoryButtonObject = GameObject::Create("Equipment Button");
-	inventoryButtonObject->transform.SetPosition(Engine::GetWindowSize().width - 100.0f, Engine::GetWindowSize().height - 10.f, 0.0f);
-	auto* inventoryButtonImage = inventoryButtonObject->AddComponent<ImageRenderer>();
-	inventoryButtonImage->SetImage("Assets/Textures/Buttons/equipment_button.png");
-	inventoryButtonImage->SetSize(75, 75);
-	inventoryButtonImage->SetPivot(1.0f, 1.0f);
-
-	auto* buttonText = inventoryButtonObject->AddComponent<TextRenderer>();
-	buttonText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 16.0f);
-	buttonText->SetText("H");
-	buttonText->SetPivot(1.0f, 1.0f);
-}
-
-/****************************************************************** STATS UI ******************************************************************/
-
-	// Level bar
-	{
-		GameObject* object = GameObject::Create("Level Text");
-		object->transform.SetPosition(20.0f, 20.0f, 0.0f);
-		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
-		text->SetPivot(0.0f, 0.0f);
-		text->SetText("Level: 1   XP: 0/100");
-	}
-
-	// Health bar
-	{
-		GameObject* object = GameObject::Create("Health Text");
-		object->transform.SetPosition(20.0f, 50.0f, 0.0f);
-		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
-		text->SetPivot(0.0f, 0.0f);
-		text->SetText("Health: 100/100");
-	}
-
-	// Mana bar
-	{
-		GameObject* object = GameObject::Create("Mana Text");
-		object->transform.SetPosition(20.0f, 80, 0.0f);
-		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
-		text->SetPivot(0.0f, 0.0f);
-		text->SetText("Mana: 100/100");
-	}
-
-	// Hunger bar
-	{
-		GameObject* object = GameObject::Create("Hunger Text");
-		object->transform.SetPosition(20.0f, 110, 0.0f);
-		auto* text = object->AddComponent<TextRenderer>();
-		text->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 18.0f);
-		text->SetPivot(0.0f, 0.0f);
-		text->SetText("Hunger: 100/100");
 	}
 
 /****************************************************************** TEXT UI ******************************************************************/
@@ -298,13 +306,18 @@ int main()
 
 	// UI text overlay
 	GameObject* fpsTextObject = GameObject::Create("FPS Text");
-	fpsTextObject->transform.SetPosition(Engine::GetWindowSize().width - 20.0f, 20.0f, 0.0f);
+	fpsTextObject->transform.SetPosition(Engine::GetWindowSize().width - 220.0f, 20.0f, 0.0f);
 	auto* fpsText = fpsTextObject->AddComponent<TextRenderer>();
 	fpsText->SetFont("Assets/Fonts/ManaSeedTitle.ttf", 22.0f);
 	fpsText->SetPivot(1.0f, 0.0f);
 
 	Engine::Run();
+
+	// Shutdown engine first so all components are destroyed before tearing down audio
 	Engine::Shutdown();
+
+	// Then cleanup audio system once sources/buffers are gone
+	TM::Audio::AudioSource::CleanupAudioSystem();
 
 	return 0;
 }

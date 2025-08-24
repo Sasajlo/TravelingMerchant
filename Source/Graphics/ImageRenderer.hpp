@@ -42,7 +42,7 @@ namespace TM
             void SubscribeToScene();
             void UnsubscribeFromScene();
 
-            void SetImage(const std::string& path);
+            void SetImage(const std::string& path, TextureFilter filter = TextureFilter::LINEAR);
             void SetSize(float w, float h) { _size = { w, h }; }
             Size GetSize() { return { (int) _size.x, (int) _size.y }; }
             void SetPivot(float x, float y) { _pivot = glm::clamp(glm::vec2{ x, y }, glm::vec2(0.0f), glm::vec2(1.0f)); }

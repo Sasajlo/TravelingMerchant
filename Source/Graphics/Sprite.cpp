@@ -71,9 +71,9 @@ void Sprite::Bind()
     glBindTexture(GL_TEXTURE_2D, _textureId);
 }
 
-void Sprite::SetTexture(std::string texturePath)
+void Sprite::SetTexture(std::string texturePath, TextureFilter filter)
 {
-    _textureId = Texture::Load(texturePath);
+    _textureId = Texture::Load(texturePath, filter);
     _isAnimated = false; // Reset to static sprite
     _columns = 1;
     _rows = 1;
@@ -133,9 +133,9 @@ glm::vec4 Sprite::GetCurrentTextureCoordinates() const
     return glm::vec4(texLeft, texBottom, texRight, texTop);
 }
 
-void Sprite::SetSpriteSheet(std::string texturePath, int columns, int rows)
+void Sprite::SetSpriteSheet(std::string texturePath, int columns, int rows, TextureFilter filter)
 {
-    _textureId = Texture::Load(texturePath);
+    _textureId = Texture::Load(texturePath, filter);
     _isAnimated = true; // Enable animation
     _columns = columns;
     _rows = rows;

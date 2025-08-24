@@ -2,12 +2,18 @@
 
 #include <string>
 #include <unordered_map>
-#include <Graphics/Core.hpp>
+#include <glad/glad.h>
 
 namespace TM
 {
 	namespace Graphics
 	{
+		enum class TextureFilter
+		{
+			LINEAR,   // Smooth
+			NEAREST   // Pixel-perfect
+		};
+
 		class Texture
 		{
 		private:
@@ -16,6 +22,7 @@ namespace TM
 
 			unsigned int _textureId;
 			std::string _path;
+			TextureFilter _filter;
 
 		public:
 			Texture() = default;
@@ -23,10 +30,13 @@ namespace TM
 
 			// Static method to load texture and return texture ID
 			// Returns the texture ID that can be used with OpenGL
-			static unsigned int Load(const std::string& path);
+			static unsigned int Load(const std::string& path, TextureFilter filter = TextureFilter::NEAREST);
 
 			// Load texture and store it in this instance
-			void LoadTexture(const std::string& path);
+			void LoadTexture(const std::string& path, TextureFilter filter = TextureFilter::NEAREST);
+
+			// Get the current filtering mode
+			TextureFilter GetFilter() const { return _filter; }
 
 			// Bind the texture for rendering
 			void Bind() const;

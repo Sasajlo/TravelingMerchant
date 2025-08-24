@@ -15,9 +15,9 @@ void ImageRenderer::UpdateSizeFromTexture()
     if (w > 0 && h > 0) _size = glm::vec2((float)w, (float)h);
 }
 
-void ImageRenderer::SetImage(const std::string& path)
+void ImageRenderer::SetImage(const std::string& path, TextureFilter filter)
 {
-    _textureId = Texture::Load(path);
+    _textureId = Texture::Load(path, filter);
     UpdateSizeFromTexture();
 }
 

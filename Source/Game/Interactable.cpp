@@ -1,5 +1,6 @@
 #include "Interactable.hpp"
 #include <Game/Player.hpp>
+#include <Game/ItemEntity.hpp>
 
 using namespace TM::Game;
 
@@ -75,7 +76,7 @@ void Interactable::SpawnLogs()
     {
         std::string logName = _gameObject.GetName() + " Log " + std::to_string(i);
         GameObject* logObject = GameObject::Create(logName);
-        logObject->transform.SetPosition(_gameObject.transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
+        logObject->transform.SetPosition(_gameObject.transform.position);
         logObject->transform.SetScale(0.6f, 0.6f, 0.6f);
         logObject->AddTag("Log");
         Sprite* sprite = logObject->AddComponent<Sprite>();
@@ -83,7 +84,7 @@ void Interactable::SpawnLogs()
         sprite->SetPivot(0.5f, 0.45); // Set pivot to center
         logObject->AddComponent<SpriteRenderer>();
         logObject->AddComponent<Billboard>();
-        logObject->AddComponent<Interactable>();
+        logObject->AddComponent<ItemEntity>();
     }
 }
 
@@ -94,7 +95,7 @@ void Interactable::SpawnRocks()
     {
         std::string logName = _gameObject.GetName() + " Rocks " + std::to_string(i);
         GameObject* rocksObject = GameObject::Create(logName);
-        rocksObject->transform.SetPosition(_gameObject.transform.GetPosition() + Vector3(Math::RandomFloat(-1.0f, 1.0f), 0.0f, Math::RandomFloat(-1.0f, 1.0f)));
+        rocksObject->transform.SetPosition(_gameObject.transform.position);
         rocksObject->transform.SetScale(0.45f, 0.45f, 0.45f);
         rocksObject->AddTag("Rocks");
         Sprite* sprite = rocksObject->AddComponent<Sprite>();
@@ -102,6 +103,6 @@ void Interactable::SpawnRocks()
         sprite->SetPivot(0.5f, 0.3f); // Set pivot to center
         rocksObject->AddComponent<SpriteRenderer>();
         rocksObject->AddComponent<Billboard>();
-        rocksObject->AddComponent<Interactable>();
+        rocksObject->AddComponent<ItemEntity>();
     }
 }

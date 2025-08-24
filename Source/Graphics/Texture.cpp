@@ -15,10 +15,13 @@ namespace TM
 		std::unordered_map<std::string, unsigned int> Texture::_textureCache;
 		unsigned int Texture::_nextTextureId = 1;
 
-		unsigned int Texture::Load(const std::string& path)
+		unsigned int Texture::Load(const std::string& path, TextureFilter filter)
 		{
-			// Check if texture is already loaded
-			auto it = _textureCache.find(path);
+			// Create a cache key that includes the filter mode
+			std::string cacheKey = path + "_" + (filter == TextureFilter::NEAREST ? "nearest" : "linear");
+			
+			// Check if texture is already loaded with the same filter
+			auto it = _textureCache.find(cacheKey);
 			if (it != _textureCache.end())
 			{
 				return it->second;
@@ -47,13 +50,18 @@ namespace TM
 				// Texture parameters
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				
+				// Set filtering based on the filter parameter
+				GLenum minFilter = (filter == TextureFilter::NEAREST) ? GL_NEAREST : GL_LINEAR;
+				GLenum magFilter = (filter == TextureFilter::NEAREST) ? GL_NEAREST : GL_LINEAR;
+				
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 
 				stbi_image_free(data);
 				
-				// Store in cache
-				_textureCache[path] = textureID;
+				// Store in cache with the filter-specific key
+				_textureCache[cacheKey] = textureID;
 				
 				return textureID;
 			}
@@ -65,10 +73,11 @@ namespace TM
 			}
 		}
 
-		void Texture::LoadTexture(const std::string& path)
+		void Texture::LoadTexture(const std::string& path, TextureFilter filter)
 		{
 			_path = path;
-			_textureId = Load(path);
+			_filter = filter;
+			_textureId = Load(path, filter);
 		}
 
 		void Texture::Bind() const

@@ -1,6 +1,9 @@
 #pragma once
 
 // Game module headers
+#include <Game/Player/PlayerStats.hpp>
+#include <Game/Player/PlayerHUD.hpp>
+
 #include <Game/Player.hpp>
 #include <Game/Slime.hpp>
 #include <Game/Inventory/Inventory.hpp>

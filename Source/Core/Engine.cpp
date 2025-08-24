@@ -36,12 +36,12 @@ void Engine::Run()
 		// Handle delta time calculation
 		Instance()._time.Update();
 
-		int newFps = Instance().GetFPS();
+		/*int newFps = Instance().GetFPS();
 		if (fps != newFps)
 		{
 			fps = newFps;
 			Instance()._window.UpdateFPS(fps);
-		}
+		}*/
 
 		// Poll for events
 		Instance()._window.PollEvents();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <Core/Component.hpp>
+#include <Core/GameObject.hpp>
 #include <Core/Input.hpp>
 #include <Graphics/Camera.hpp>
 
@@ -10,11 +10,6 @@ using namespace TM::Graphics;
 
 namespace TM
 {
-    namespace Core
-    {
-        class GameObject; // Forward declaration
-    }
-
     namespace Game
     {
         class Billboard : public Component

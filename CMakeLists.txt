@@ -44,6 +44,8 @@ set(SOURCES
     Source/Utils/Color.cpp
     Source/Utils/Math.cpp
     
+    Source/Audio/AudioSource.cpp
+    
     Extern/glad/src/glad.c
 )
 
@@ -87,6 +89,8 @@ set(HEADERS
     Source/Game/SpriteManager.hpp
 
     Source/Game/Inventory/Inventory.hpp
+    
+    Source/Audio/AudioSource.hpp
 )
 
 # Create executable
@@ -95,10 +99,28 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} "Source/Game/Interactable.c
 # Set the GLAD source file to be compiled as C
 set_source_files_properties(Extern/glad/src/glad.c PROPERTIES LANGUAGE C)
 
-# Link libraries
-target_link_libraries(${PROJECT_NAME} 
+# FMOD configuration
+set(FMOD_DIR "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows" CACHE PATH "Path to FMOD Studio/Core API")
+
+# Add FMOD include directory
+include_directories(${FMOD_DIR}/api/core/inc)
+
+# Link libraries (GLFW + FMOD)
+target_link_libraries(${PROJECT_NAME}
     ${CMAKE_SOURCE_DIR}/Extern/glfw-3.4.bin.WIN64/lib-vc2022/glfw3_mt.lib
+    $<$<CONFIG:Debug>:${FMOD_DIR}/api/core/lib/x64/fmodL_vc.lib>
+    $<$<NOT:$<CONFIG:Debug>>:${FMOD_DIR}/api/core/lib/x64/fmod_vc.lib>
 )
+
+# Copy FMOD runtime DLLs to output directory (Debug uses fmodL.dll)
+if(WIN32)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<$<CONFIG:Debug>:${FMOD_DIR}/api/core/lib/x64/fmodL.dll>
+            $<$<NOT:$<CONFIG:Debug>>:${FMOD_DIR}/api/core/lib/x64/fmod.dll>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+endif()
 
 # Copy DLL files to output directory (for Windows)
 if(WIN32)

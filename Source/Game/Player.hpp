@@ -8,10 +8,12 @@
 #include <Physics/Raycast.hpp>
 #include <Game/Interactable.hpp>
 #include <Game/SpriteManager.hpp>
+#include <Audio/AudioSource.hpp>
 
 //using namespace TM::Core;
 using namespace TM::Graphics;
 using namespace TM::Physics;
+using namespace TM::Audio;
 
 namespace TM
 {
@@ -44,6 +46,7 @@ namespace TM
             bool _wasMoving = false;
 
             Inventory* _inventory = nullptr;
+			AudioSource* _audioSource = nullptr;
 
         public:
 			Player(GameObject& gameObject) : Component(gameObject) {}
@@ -54,6 +57,7 @@ namespace TM
                 _cursorText = GameObject::Find("Cursor Text")->GetComponent<TextRenderer>();
                 _spriteManager = _gameObject.GetComponent<SpriteManager>();
                 _inventory = _gameObject.GetComponent<Inventory>();
+				_audioSource = _gameObject.GetComponent<AudioSource>();
 
                 // Add animation states
                 _spriteManager->AddAnimationState("idle", "Assets/Textures/Player/Animations/idle.png", 4, 4, 5.0f, true);
@@ -112,6 +116,51 @@ namespace TM
                 _cameraAngle = std::lerp(_cameraAngle, _targetAngle, 10.0f * deltaTime);
                 Vector3 newOffset = _cameraOffset.RotateAroundY(_cameraAngle);
                 _camera->SetFollowOffset(newOffset);
+
+                // Handle raycast
+                auto hit = Raycast::MouseRaycast();
+                if (hit.hitObject && hit.hitObject->HasComponent<Interactable>())
+                {
+                    Interactable* interactable = hit.hitObject->GetComponent<Interactable>();
+
+                    // hover toggle
+                    if (_hoveredInteractable != interactable)
+                    {
+                        if (_hoveredInteractable) _hoveredInteractable->SetHovered(false);
+                        interactable->SetHovered(true);
+                        _hoveredInteractable = interactable;
+                    }
+
+                    if (!_interacting && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+                    {
+                        CollectResource(interactable);
+                    }
+
+                    // Show cursor text
+                    if (_cursorText)
+                    {
+                        _cursorText->SetText(interactable->GetInteractionText());
+                        _cursorText->SetActive(true);
+                    }
+                }
+                else
+                {
+                    if (_hoveredInteractable)
+                    {
+                        _hoveredInteractable->SetHovered(false);
+                        _hoveredInteractable = nullptr;
+                    }
+
+                    _cursorText->SetActive(false);
+                }
+
+                if (hit.hitObject && hit.hitObject->HasTag("Ground"))
+                {
+                    if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+                    {
+                        MoveTo(hit.hitPoint);
+                    }
+                }
 
                 if (!_interacting)
                 {
@@ -206,51 +255,6 @@ namespace TM
                     };
                 }
 
-                // Handle raycast
-                auto hit = Raycast::MouseRaycast();
-                if (hit.hitObject && hit.hitObject->HasComponent<Interactable>())
-                {
-                    Interactable* interactable = hit.hitObject->GetComponent<Interactable>();
-
-                    // hover toggle
-                    if (_hoveredInteractable != interactable)
-                    {
-                        if (_hoveredInteractable) _hoveredInteractable->SetHovered(false);
-                        interactable->SetHovered(true);
-                        _hoveredInteractable = interactable;
-                    }
-
-                    if (!_interacting && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-                    {
-                        CollectResource(interactable);
-                    }
-
-                    // Show cursor text
-                    if (_cursorText)
-                    {
-                        _cursorText->SetText(interactable->GetInteractionText());
-                        _cursorText->SetActive(true);
-                    }
-                }
-                else
-                {
-                    if (_hoveredInteractable)
-                    {
-                        _hoveredInteractable->SetHovered(false);
-                        _hoveredInteractable = nullptr;
-                    }
-
-                    _cursorText->SetActive(false);
-                }
-
-                if (hit.hitObject && hit.hitObject->HasTag("Ground"))
-                {
-                    if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-                    {
-                        MoveTo(hit.hitPoint);
-                    }
-                }
-
 				// Handle moving to target position
                 if (!_interacting && _goToTarget)
                 {
@@ -290,6 +294,13 @@ namespace TM
                 _spriteManager->SetTrigger("chop");
                 _targetInteractable = object;
                 _interacting = true;
+
+                if (object->GetGameObject()->HasTag("Slime"))
+                {
+                    // Play audio if available
+                    _audioSource->SetAudioFile("Assets/Audio/slash.wav");
+                    _audioSource->Play();
+                }
             }
 
             void Mine(Interactable* object)
@@ -326,6 +337,10 @@ namespace TM
 
                         _targetInteractable->Interact(this);
                         _targetInteractable = nullptr;
+
+						// Play audio if available
+                        _audioSource->SetAudioFile("Assets/Audio/chop.wav");
+                        _audioSource->Play();
                     }
                 }
                 else if (_targetInteractable->GetGameObject()->HasTag("Stone"))
@@ -337,6 +352,10 @@ namespace TM
 
                         _targetInteractable->Interact(this);
                         _targetInteractable = nullptr;
+
+                        // Play audio if available
+                        _audioSource->SetAudioFile("Assets/Audio/mine.wav");
+                        _audioSource->Play();
                     }
                 }
                 else if (_targetInteractable->GetGameObject()->HasTag("Berry Bush"))
@@ -348,6 +367,10 @@ namespace TM
 
                         _targetInteractable->Interact(this);
                         _targetInteractable = nullptr;
+
+                        // Play audio if available
+                        _audioSource->SetAudioFile("Assets/Audio/harvest.wav");
+                        _audioSource->Play();
                     }
                 }
                 else if (_targetInteractable->GetGameObject()->HasTag("Plant"))
@@ -359,6 +382,10 @@ namespace TM
 
                         _targetInteractable->Interact(this);
                         _targetInteractable = nullptr;
+
+                        // Play audio if available
+                        _audioSource->SetAudioFile("Assets/Audio/harvest.wav");
+                        _audioSource->Play();
                     }
                 }
                 else if (_targetInteractable->GetGameObject()->HasTag("Log"))
@@ -370,6 +397,10 @@ namespace TM
 
                         _targetInteractable->Interact(this);
                         _targetInteractable = nullptr;
+
+                        // Play audio if available
+                        _audioSource->SetAudioFile("Assets/Audio/collect.wav");
+                        _audioSource->Play();
                     }
                 }
                 else if (_targetInteractable->GetGameObject()->HasTag("Rocks"))
@@ -381,6 +412,10 @@ namespace TM
 
                         _targetInteractable->Interact(this);
                         _targetInteractable = nullptr;
+
+                        // Play audio if available
+                        _audioSource->SetAudioFile("Assets/Audio/collect.wav");
+                        _audioSource->Play();
                     }
                 }
                 else if (_targetInteractable->GetGameObject()->HasTag("Slime"))

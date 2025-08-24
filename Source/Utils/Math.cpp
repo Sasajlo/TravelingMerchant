@@ -83,5 +83,10 @@ namespace TM
             // Smoothstep function: 3t^2 - 2t^3
             return x * x * (3.0f - 2.0f * x);
         }
+
+        float Math::Sign(float value)
+        {
+            return value >= 0.0f ? 1.0f : -1.0f;
+        }
     }
 }

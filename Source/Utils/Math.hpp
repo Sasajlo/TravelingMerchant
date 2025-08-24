@@ -34,6 +34,8 @@ namespace TM
             // Smooth interpolation (smoothstep)
             static float SmoothStep(float edge0, float edge1, float x);
 
+            static float Sign(float value);
+
         private:
             static std::mt19937 _randomEngine;
             static std::uniform_real_distribution<float> _floatDistribution;
