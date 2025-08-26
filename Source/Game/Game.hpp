@@ -11,5 +11,6 @@
 #include <Game/Interactable.hpp>
 #include <Game/Billboard.hpp>
 #include <Game/Debug.hpp>
+#include <Game/MapIcon.hpp>
 
 using namespace TM::Game;

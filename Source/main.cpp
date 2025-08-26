@@ -40,6 +40,12 @@ int main()
 	playerObject->AddComponent<PlayerHUD>();
 	playerObject->AddComponent<Inventory>();
 
+	auto mapIcon = playerObject->AddComponent<MapIcon>();
+	mapIcon->SetIcon("Assets/Textures/MapIcons/player_icon.png");
+	mapIcon->SetPivot(0.5f, 0.5f);
+	mapIcon->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+	mapIcon->SetAlwaysOnTop(true);
+
 	camera->LookAt(playerObject); // Set camera to follow player
 	camera->Follow(playerObject, {}); // Set camera to follow player
 
@@ -101,6 +107,11 @@ int main()
 		npcObject->AddComponent<SpriteManager>();
 		npcObject->AddComponent<Billboard>();
 		npcObject->AddComponent<Interactable>();
+		auto mapIcon = npcObject->AddComponent<MapIcon>();
+		mapIcon->SetIcon("Assets/Textures/Miscellaneous/question_mark.png");
+		mapIcon->SetPivot(0.5f, 0.5f);
+		mapIcon->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
+		mapIcon->SetAlwaysOnTop(true);
 
 		// Add question mark above NPC
 		{
@@ -110,7 +121,7 @@ int main()
 			Sprite* questionMarkSprite = questionMarkObject->AddComponent<Sprite>();
 			questionMarkSprite->SetPivot(0.5f, 0.0f); // Set pivot to center
 			questionMarkSprite->SetTexture("Assets/Textures/Miscellaneous/question_mark.png", TextureFilter::LINEAR);
-			questionMarkSprite->SetColor(1.0f, 1.0f, 0.0f, 1.0f); // Slightly transparent
+			questionMarkSprite->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
 			questionMarkObject->AddComponent<SpriteRenderer>();
 		}
 	}
@@ -147,6 +158,9 @@ int main()
 			sprite->SetTexture("Assets/Textures/ground.png");
 			gameObject->AddComponent<SpriteRenderer>();
 			gameObject->AddTag("Ground");
+
+			auto mapIcon = gameObject->AddComponent<MapIcon>();
+			mapIcon->SetIcon("Assets/Textures/ground.png");
 		}
 	}
 
@@ -166,6 +180,9 @@ int main()
 		baseRenderer->SetSwaySpeed(1.6f);    // Speed of swaying
 		treeObject->AddComponent<Billboard>();
 		treeObject->AddComponent<Interactable>();
+		auto mapIcon = treeObject->AddComponent<MapIcon>();
+		mapIcon->SetIcon("Assets/Textures/MapIcons/tree.png");
+		mapIcon->SetPivot(0.5f, 0.08f);
 
 		// Create tree top
 		{
@@ -196,6 +213,9 @@ int main()
 		gameObject->AddComponent<SpriteRenderer>();
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
+		auto mapIcon = gameObject->AddComponent<MapIcon>();
+		mapIcon->SetIcon("Assets/Textures/MapIcons/stone_icon.png");
+		mapIcon->SetPivot(0.5f, 0.15f);
 	}
 
 	// Spawn berry bush objects
@@ -215,6 +235,9 @@ int main()
 		renderer->SetSwaySpeed(1.6f);    // Speed of swaying
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
+		auto mapIcon = gameObject->AddComponent<MapIcon>();
+		mapIcon->SetIcon("Assets/Textures/berry_bush.png");
+		mapIcon->SetPivot(0.5f, 0.1f);
 	}
 
 	// Spawn plant objects
@@ -234,6 +257,9 @@ int main()
 		renderer->SetSwaySpeed(1.6f);    // Speed of swaying
 		gameObject->AddComponent<Billboard>();
 		gameObject->AddComponent<Interactable>();
+		auto mapIcon = gameObject->AddComponent<MapIcon>();
+		mapIcon->SetIcon("Assets/Textures/plant.png");
+		mapIcon->SetPivot(0.5f, 0.35f);
 	}
 
 /****************************************************************** INVENTORY UI ******************************************************************/

@@ -5,6 +5,7 @@
 #include <Core/Engine.hpp>
 #include <Core/Input.hpp>
 #include <Graphics/ImageRenderer.hpp>
+#include <Graphics/Minimap.hpp>
 
 using namespace TM::Core;
 using namespace TM::Graphics;
@@ -119,10 +120,19 @@ namespace TM
             {
                 GameObject* minimapObject = GameObject::Create("Minimap");
                 minimapObject->transform.SetPosition(Engine::GetWindowSize().width - 20.0f, 20.0f, 0.0f);
-                auto* minimapImage = minimapObject->AddComponent<ImageRenderer>();
-                minimapImage->SetImage("Assets/Textures/UI/Backgrounds/round_background_1.png");
-                minimapImage->SetSize(180, 180);
-                minimapImage->SetPivot(1.0f, 0.0f);
+                
+                // Add Minimap component instead of ImageRenderer
+                auto* minimap = minimapObject->AddComponent<Minimap>();
+                minimap->SetSize(180, 180);
+                minimap->SetPivot(1.0f, 0.0f); // Top-right pivot
+				minimap->SetScale(2.0f); // Zoom out to show more area
+                
+                // Set the player reference for centering
+                GameObject* player = GameObject::Find("Player");
+                if (player)
+                {
+                    minimap->SetPlayer(player);
+                }
 
                 // Create minimap frame
                 {

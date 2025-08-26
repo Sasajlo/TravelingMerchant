@@ -4,6 +4,7 @@
 #include <Graphics/Camera.hpp>
 #include <Graphics/Core.hpp>
 #include <Graphics/ImageRenderer.hpp>
+#include <Graphics/Minimap.hpp>
 #include <Graphics/Shader.hpp>
 #include <Graphics/Sprite.hpp>
 #include <Graphics/SpriteRenderer.hpp>

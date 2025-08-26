@@ -5,6 +5,8 @@
 #include <Graphics/Camera.hpp>
 #include <Graphics/TextRenderer.hpp> 
 #include <Graphics/ImageRenderer.hpp>
+#include <Graphics/Minimap.hpp>
+#include <Game/MapIcon.hpp>
 #include <algorithm>
 
 using namespace TM::Core;
@@ -319,6 +321,70 @@ void Scene::UnsubscribeTextRenderer(TextRenderer* renderer)
 	}
 }
 
+void Scene::SubscribeMinimap(Minimap* minimap)
+{
+	if (!minimap) return;
+	
+	// Check if already in the collection
+	auto it = std::find(_minimaps.begin(), _minimaps.end(), minimap);
+	if (it == _minimaps.end())
+	{
+		_minimaps.push_back(minimap);
+	}
+}
+
+void Scene::UnsubscribeMinimap(Minimap* minimap)
+{
+	if (!minimap) return;
+	
+	auto it = std::find(_minimaps.begin(), _minimaps.end(), minimap);
+	if (it != _minimaps.end())
+	{
+		_minimaps.erase(it);
+	}
+}
+
+void Scene::SubscribeMapIcon(TM::Game::MapIcon* mapIcon)
+{
+	if (!mapIcon) return;
+	
+	// Check if already in the collection
+	auto it = std::find(_mapIcons.begin(), _mapIcons.end(), mapIcon);
+	if (it == _mapIcons.end())
+	{
+		_mapIcons.push_back(mapIcon);
+		
+		// Notify all minimaps about the new map icon
+		for (auto* minimap : _minimaps)
+		{
+			if (minimap && minimap->IsActive())
+			{
+				minimap->AddMapIcon(mapIcon);
+			}
+		}
+	}
+}
+
+void Scene::UnsubscribeMapIcon(TM::Game::MapIcon* mapIcon)
+{
+	if (!mapIcon) return;
+	
+	auto it = std::find(_mapIcons.begin(), _mapIcons.end(), mapIcon);
+	if (it != _mapIcons.end())
+	{
+		_mapIcons.erase(it);
+		
+		// Notify all minimaps about the removed map icon
+		for (auto* minimap : _minimaps)
+		{
+			if (minimap && minimap->IsActive())
+			{
+				minimap->RemoveMapIcon(mapIcon);
+			}
+		}
+	}
+}
+
 void Scene::CleanupInvalidRenderers()
 {
 	// Clean up ground sprites
@@ -370,6 +436,24 @@ void Scene::CleanupInvalidRenderers()
 			}),
 		_textRenderers.end()
 	);
+	
+	// Clean up minimaps
+	_minimaps.erase(
+		std::remove_if(_minimaps.begin(), _minimaps.end(),
+			[](Minimap* minimap) {
+				return minimap == nullptr;
+			}),
+		_minimaps.end()
+	);
+	
+	// Clean up map icons
+	_mapIcons.erase(
+		std::remove_if(_mapIcons.begin(), _mapIcons.end(),
+					[](TM::Game::MapIcon* mapIcon) {
+			return mapIcon == nullptr;
+		}),
+	_mapIcons.end()
+);
 }
 
 void Scene::Awake()
@@ -452,6 +536,15 @@ void Scene::Render()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_ALPHA_TEST);
 
+	// Render minimaps
+	for (auto* minimap : _minimaps)
+	{
+		if (minimap && minimap->IsActive())
+		{
+			minimap->Render();
+		}
+	}
+
 	// Render UI elements using cached collections
 	for (ImageRenderer* renderer : _imageRenderers)
 	{
@@ -501,4 +594,6 @@ void Scene::Destroy()
 	_groundSprites.clear();
 	_imageRenderers.clear();
 	_textRenderers.clear();
+	_minimaps.clear();
+	_mapIcons.clear();
 }

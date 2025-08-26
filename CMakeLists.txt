@@ -34,6 +34,7 @@ set(SOURCES
     Source/Graphics/SpriteRenderer.cpp
     Source/Graphics/TextRenderer.cpp
     Source/Graphics/ImageRenderer.cpp
+    Source/Graphics/Minimap.cpp
     Source/Graphics/Shader.cpp
     Source/Graphics/Sprite.cpp
     Source/Graphics/Texture.cpp
@@ -45,6 +46,9 @@ set(SOURCES
     Source/Utils/Math.cpp
     
     Source/Audio/AudioSource.cpp
+
+    Source/Game/Interactable.cpp
+    Source/Game/MapIcon.cpp
     
     Extern/glad/src/glad.c
 )
@@ -68,6 +72,7 @@ set(HEADERS
     Source/Graphics/Shader.hpp
     Source/Graphics/SpriteRenderer.hpp
     Source/Graphics/ImageRenderer.hpp
+    Source/Graphics/Minimap.hpp
     Source/Graphics/TextRenderer.hpp
     Source/Graphics/Texture.hpp
 
@@ -82,6 +87,7 @@ set(HEADERS
     Source/Utils/Size.hpp
 
     Source/Game/Game.hpp
+    Source/Game/MapIcon.hpp
     Source/Game/Player.hpp
     Source/Game/Debug.hpp
     Source/Game/Billboard.hpp
@@ -94,7 +100,7 @@ set(HEADERS
 )
 
 # Create executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} "Source/Game/Interactable.cpp")
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Set the GLAD source file to be compiled as C
 set_source_files_properties(Extern/glad/src/glad.c PROPERTIES LANGUAGE C)

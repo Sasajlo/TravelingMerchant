@@ -13,6 +13,11 @@ namespace TM
 		class SpriteRenderer;
 		class ImageRenderer;
 		class TextRenderer;
+		class Minimap;
+	}
+	namespace Game
+	{
+		class MapIcon;
 	}
 }
 
@@ -26,6 +31,8 @@ namespace TM
 			friend class TM::Graphics::SpriteRenderer;
 			friend class TM::Graphics::ImageRenderer;
 			friend class TM::Graphics::TextRenderer;
+			friend class TM::Graphics::Minimap;
+			friend class TM::Game::MapIcon;
 
 		public:
 			Scene(std::string);
@@ -63,6 +70,15 @@ namespace TM
 			void SubscribeTextRenderer(TM::Graphics::TextRenderer* renderer);
 			void UnsubscribeTextRenderer(TM::Graphics::TextRenderer* renderer);
 
+			// Minimap subscription methods
+			void SubscribeMinimap(TM::Graphics::Minimap* minimap);
+			void UnsubscribeMinimap(TM::Graphics::Minimap* minimap);
+
+					// MapIcon subscription methods
+		void SubscribeMapIcon(TM::Game::MapIcon* mapIcon);
+		void UnsubscribeMapIcon(TM::Game::MapIcon* mapIcon);
+		const std::vector<TM::Game::MapIcon*>& GetMapIcons() const { return _mapIcons; }
+
 			// Cleanup methods
 			void CleanupInvalidRenderers();
 
@@ -90,6 +106,10 @@ namespace TM
 			// UI Renderer subscription systems
 			std::vector<TM::Graphics::ImageRenderer*> _imageRenderers;
 			std::vector<TM::Graphics::TextRenderer*> _textRenderers;
+
+			// Minimap and MapIcon subscription systems
+			std::vector<TM::Graphics::Minimap*> _minimaps;
+			std::vector<TM::Game::MapIcon*> _mapIcons;
 
 			// Helper methods for finding objects in hierarchy
 			GameObject* FindGameObjectInHierarchy(const std::string& name, GameObject* root);

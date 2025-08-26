@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <numbers>
 #include <Core/Core.hpp>
 #include <Graphics/Camera.hpp>
 #include <Graphics/SpriteRenderer.hpp>
@@ -9,6 +10,7 @@
 #include <Game/Interactable.hpp>
 #include <Game/SpriteManager.hpp>
 #include <Audio/AudioSource.hpp>
+#include <Game/MapIcon.hpp>
 
 //using namespace TM::Core;
 using namespace TM::Graphics;
@@ -48,6 +50,8 @@ namespace TM
             Inventory* _inventory = nullptr;
 			AudioSource* _audioSource = nullptr;
 
+			MapIcon* _mapIcon = nullptr;
+
         public:
 			Player(GameObject& gameObject) : Component(gameObject) {}
 
@@ -58,6 +62,7 @@ namespace TM
                 _spriteManager = _gameObject.GetComponent<SpriteManager>();
                 _inventory = _gameObject.GetComponent<Inventory>();
 				_audioSource = _gameObject.GetComponent<AudioSource>();
+				_mapIcon = _gameObject.GetComponent<MapIcon>();
 
                 // Add animation states
                 _spriteManager->AddAnimationState("idle", "Assets/Textures/Player/Animations/idle.png", 4, 4, 5.0f, true);
@@ -77,18 +82,10 @@ namespace TM
                 _spriteManager->AddTransition("idle", "harvest", "harvest");
 
                 _spriteManager->AddTransition("run", "idle", "!isMoving");
-                /*_spriteManager->AddTransition("run", "chop", "chop");
-                _spriteManager->AddTransition("run", "mine", "mine");
-                _spriteManager->AddTransition("run", "harvest", "harvest");*/
 
                 _spriteManager->AddTransition("chop", "idle");
                 _spriteManager->AddTransition("mine", "idle");
                 _spriteManager->AddTransition("harvest", "idle");
-            }
-
-            void Start() override
-            {
-                
             }
 
             void Update(float deltaTime) override
@@ -204,8 +201,11 @@ namespace TM
                     rotatedDir.y = 0.0f; // No vertical movement
 
                     // Store the world-space direction
-                    if (rotatedDir != Vector3::Zero)
+                    if (rotatedDir != Vector3::Zero) {
                         _worldMovementDirection = rotatedDir;
+                        float rotationAngle = atan2(rotatedDir.z, rotatedDir.x) * 180.0f / std::numbers::pi;
+                        _mapIcon->SetRotation(rotationAngle + 90.0f);
+                    }
 
                     _gameObject.transform.position += rotatedDir * MOVEMENT_SPEED * deltaTime;
 
