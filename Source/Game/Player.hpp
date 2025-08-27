@@ -11,6 +11,7 @@
 #include <Game/SpriteManager.hpp>
 #include <Audio/AudioSource.hpp>
 #include <Game/MapIcon.hpp>
+#include <Game/Player/PlayerMovement.hpp>
 
 //using namespace TM::Core;
 using namespace TM::Graphics;
@@ -53,6 +54,8 @@ namespace TM
 
 			MapIcon* _mapIcon = nullptr;
 
+			PlayerMovement* _playerMovement = nullptr;
+
         public:
 			Player(GameObject& gameObject) : Component(gameObject) {}
 
@@ -64,6 +67,7 @@ namespace TM
                 _inventory = _gameObject.GetComponent<Inventory>();
 				_audioSource = _gameObject.GetComponent<AudioSource>();
 				_mapIcon = _gameObject.GetComponent<MapIcon>();
+				_playerMovement = _gameObject.GetComponent<PlayerMovement>();
 
                 // Add animation states
                 _spriteManager->AddAnimationState("idle", "Assets/Textures/Player/Animations/idle.png", 4, 4, 5.0f, true);
@@ -176,7 +180,7 @@ namespace TM
                     if (Input::IsKeyHeld(GLFW_KEY_A))
                         direction.x -= 1.0f;
 
-                    if (direction.Length() > 0.0f) {
+                    if (_playerMovement->HasInput()) {
                         _goToTarget = false; // Stop moving to target if player is moving
                         direction = direction.Normalized();
                         if (!_wasMoving)
@@ -210,7 +214,7 @@ namespace TM
                         _mapIcon->SetRotation(rotationAngle + 90.0f);
                     }
 
-                    _gameObject.transform.position += rotatedDir * MOVEMENT_SPEED * deltaTime;
+                    //_gameObject.transform.position += rotatedDir * MOVEMENT_SPEED * deltaTime;
 
                 }
                 else

@@ -36,6 +36,7 @@ int main()
 	playerObject->AddComponent<SpriteRenderer>();
 	playerObject->AddComponent<Billboard>();
 	playerObject->AddComponent<SpriteManager>();
+	playerObject->AddComponent<PlayerMovement>();
 	playerObject->AddComponent<PlayerStats>();
 	playerObject->AddComponent<PlayerHUD>();
 	playerObject->AddComponent<Inventory>();
