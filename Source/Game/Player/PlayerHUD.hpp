@@ -194,6 +194,20 @@ namespace TM
                                 slotBackgroundImage->SetPivot(1.0f, 1.0f);
                             }
 
+                            if (i == 9)
+                            {
+                                GameObject* spellIcon = actionBar->CreateChild("Sword Melee Spell Icon");
+                                spellIcon->transform.SetPosition(-i * 50.0f - 15.0f, -15.0f, 0.0f);
+                                auto* spellIconImage = spellIcon->AddComponent<ImageRenderer>();
+                                spellIconImage->SetImage("Assets/Textures/Spells/sword_melee.png");
+                                spellIconImage->SetSize(40.0f, 40.0f);
+                                spellIconImage->SetPivot(1.0f, 1.0f);
+                                auto* keyText = spellIcon->AddComponent<TextRenderer>();
+                                keyText->SetFont("Assets/Fonts/Georgia.ttf", 16.0f);
+                                keyText->SetPivot(1.0f, 1.0f);
+								keyText->SetText("1");
+                            }
+
                             // Create slot frame
                             {
                                 GameObject* slotBackground = actionBar->CreateChild("Slot Frame" + std::to_string(i));

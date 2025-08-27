@@ -38,7 +38,8 @@ void Camera::Update(float deltaTime)
 		Vector3 cameraPos = _followTarget->transform.position + _followOffset;
 
 		// Update camera transform
-		_gameObject.transform.SetPosition(cameraPos.x, cameraPos.y, cameraPos.z);
+		//_gameObject.transform.position = _gameObject.transform.position.Lerp(cameraPos, 5.0f * deltaTime);
+		_gameObject.transform.position = cameraPos;
 	}
 
 	if (_lookAtTarget)

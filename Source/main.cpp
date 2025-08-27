@@ -46,8 +46,14 @@ int main()
 	mapIcon->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 	mapIcon->SetAlwaysOnTop(true);
 
-	camera->LookAt(playerObject); // Set camera to follow player
-	camera->Follow(playerObject, {}); // Set camera to follow player
+	// Create camera target object
+	GameObject* cameraTargetObject = GameObject::Create("Camera Target");
+	cameraTargetObject->transform.SetPosition(0.0f, 0.5f, 0.0f); // Slightly above player
+	auto cameraTarget = cameraTargetObject->AddComponent<CameraTarget>();
+	cameraTarget->SetTarget(playerObject);
+
+	camera->LookAt(cameraTargetObject); // Set camera to follow player
+	camera->Follow(cameraTargetObject, {}); // Set camera to follow player
 
 	auto* playerAudoSource = playerObject->AddComponent<AudioSource>();
 	playerAudoSource->SetAudioType(AudioSource::AudioType::ThreeDimensional);

@@ -30,6 +30,7 @@ namespace TM
 			float _cameraAngle = 0.0f;
 			float _targetAngle = 0.0f;
 			Vector3 _cameraOffset = Vector3(0.0f, 10.0f, 10.0f); // Camera offset from player
+			Vector3 _targetOffset = Vector3(0.0f, 10.0f, 10.0f); // Camera offset from player
 
 			bool _goToTarget = false; // Flag to indicate if the player should move to the target position
 			Vector3 _targetPosition = Vector3::Zero; // Target position for camera follow
@@ -105,12 +106,14 @@ namespace TM
                 if (scrollDelta != 0)
                 {
                     auto scroll = _scrollOffset * scrollDelta * SCROLL_SPEED;
-                    if (_cameraOffset.y - scroll.y >= 2.0f && _cameraOffset.y - scroll.y <= 20.0f)
-					    _cameraOffset -= scroll;
+                    if (_targetOffset.y - scroll.y >= 2.0f && _targetOffset.y - scroll.y <= 20.0f)
+                        _targetOffset -= scroll;
                 }
 
+				_cameraOffset = _cameraOffset.Lerp(_targetOffset, 5.0f * deltaTime);
+
                 // Lerp camera angle
-                _cameraAngle = std::lerp(_cameraAngle, _targetAngle, 10.0f * deltaTime);
+                _cameraAngle = std::lerp(_cameraAngle, _targetAngle, 5.0f * deltaTime);
                 Vector3 newOffset = _cameraOffset.RotateAroundY(_cameraAngle);
                 _camera->SetFollowOffset(newOffset);
 
